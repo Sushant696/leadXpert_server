@@ -13,12 +13,16 @@ const responseMessages = {
     DELETED: "The member has been removed successfully.",
     ROLE_UPDATE: "The member's role has been updated successfully.",
   },
+  MEMBERSHIP: {
+    CREATED: "The membership relation has been created successfully.",
+  },
   PIPELINE: {
     CREATED: "The pipeline has been created successfully.",
     UPDATED: "The pipeline has been updated successfully.",
     DELETED: "The pipeline has been deleted successfully.",
     RETRIEVED: "The pipeline data has been retrieved successfully.",
   },
+
 }
 
 export default responseMessages
