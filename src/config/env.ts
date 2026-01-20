@@ -14,6 +14,7 @@ function requiredEnv(key: string): string {
 export const env = {
   MONGODB_URI: requiredEnv("MONGODB_URI"),
   PEPPER: requiredEnv("PEPPER"),
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
   NODE_ENV: process.env.NODE_ENV ?? "development",
   PORT: process.env.PORT ?? "3000",
   VERSION: process.env.VERSION ?? "v1",

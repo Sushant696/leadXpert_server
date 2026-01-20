@@ -1,6 +1,17 @@
 export const Roles = {
-  SUPER_ADMIN: "super_admin",
-  ADMIN: "admin",
-  EMPLOYEE: "employee",
+  SUPER_ADMIN: "SUPER_ADMIN",
+  ADMIN: "ADMIN",
+  AGENT: "AGENT",
 } as const;
+
+export const System_Roles = {
+  ADMIN: "ADMIN",
+  USER: "USER",
+} as const;
+
+
+export type Role_Type = typeof Roles[keyof typeof Roles];
+export type System_Role_Type = typeof Roles[keyof typeof Roles];
+
+
 

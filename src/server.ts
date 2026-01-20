@@ -1,19 +1,21 @@
+import cors from "cors"
 import express from "express";
 import cookieParser from "cookie-parser"
 import type { Application, NextFunction, Request, Response } from "express";
 
 import mainRouter from "./routes";
-import connectDB from "./config/db";
 import { env } from "./config/env";
+import connectDB from "./config/db";
 import { logger } from "./lib/logger";
 import rateLimiter from "./utils/rateLimiter";
 import { httpLogger } from "./lib/http-logger";
+import corsConfig from "./utils/corsConfig";
 
 const app: Application = express()
 
-app.use(rateLimiter)
-
-app.use(cookieParser())
+app.use(cors(corsConfig));
+app.use(rateLimiter);
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Roles } from "../constants/roles";
 
 const membershipSchema = new mongoose.Schema(
   {
@@ -14,7 +15,7 @@ const membershipSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["super_admin", "admin", "agent"],
+      enum: Roles,
       required: true,
     },
   },

@@ -11,6 +11,7 @@ const errorMessages = {
     EXIST:
       "The user with same email or username already exists.",
     UNAUTHORIZED: "Unauthorized access.",
+    USER_RESOURCES_MISSING: "Invalid Request, the complete the error meessage pleseeeeeee!!!!"
   },
   NAME: {
     REQUIRED: "Please provide your name. This field cannot be left empty.",
@@ -51,6 +52,17 @@ const errorMessages = {
     INVALID_REQUEST:
       "The request is invalid. Please review your input and try again.",
   },
+  MEMBERSHIP: {
+    NOT_MEMBER: "Invalid membership request,make sure you have access to pipeline.",
+    NOT_LOADED: "Membership not loaded. Use checkCompanyMembership middleware first.",
+  },
+  WORKSPACE: {
+    NOT_MEMBER: "Operation failed, make sure you are member of this workspace.",
+    NOT_LOADED: "Membership not loaded. Use checkCompanyMembership middleware first.",
+  },
+  AUTHORIZATION: {
+    INSUFFICIENT_PERMISSION: "You don't have access right to complete this operation."
+  }
 }
 
 export default errorMessages
