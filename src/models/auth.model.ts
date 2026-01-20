@@ -1,5 +1,6 @@
 import mongoose, { HydratedDocument } from "mongoose";
 import { UserType } from "../types/user.types";
+import { System_Roles } from "../constants/roles";
 
 const userSchema = new mongoose.Schema<UserType>({
   name: {
@@ -15,8 +16,8 @@ const userSchema = new mongoose.Schema<UserType>({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
+    enum: System_Roles,
+    default: System_Roles.USER,
   },
   password: {
     type: String,

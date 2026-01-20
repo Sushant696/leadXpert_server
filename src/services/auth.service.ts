@@ -6,6 +6,7 @@ import GenerateTokens from "../utils/generateToken";
 import errorMessages from "../constants/errorMessages";
 import { CreateUserDTO, loginUserDTO } from "../dtos/user.dto";
 import { UserRepository } from "../repositories/user.repository";
+import { System_Roles } from "../constants/roles";
 
 const userRepository = new UserRepository()
 
@@ -24,6 +25,7 @@ export class UserServices {
     const user = await userRepository.createUser({
       ...data,
       name,
+      role: System_Roles.USER,
       password: hashedPassword
     })
 
