@@ -1,13 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 
 import { bcryptUtil } from "../utils/bcrypt";
+import { logger } from "../infra/logger/pino";
 import ApiError from "../exceptions/apiError";
+import { System_Roles } from "../constants/roles";
 import GenerateTokens from "../utils/generateToken";
 import errorMessages from "../constants/errorMessages";
 import { CreateUserDTO, loginUserDTO } from "../dtos/auth.dto";
 import { UserRepository } from "../repositories/user.repository";
-import { System_Roles } from "../constants/roles";
-import { logger } from "../infra/logger/pino";
 
 const userRepository = new UserRepository()
 
@@ -69,7 +69,8 @@ export class AuthServices {
     } catch (err) {
       logger.warn(
         { userId: existingUser.name, err },
-        'Failed to update lastLoginAt during login'
+        errorMessages.USER.LOGIN_TIME_UPDATE_FAILED
+
       );
     }
 

@@ -28,25 +28,25 @@ const isAuthenticated = asyncHandler(async (req: Request, res: Response, next: N
     decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as Record<string, any>;
   } catch (jwtError: any) {
 
-    // Convert JWT error to ApiError with proper status
+    // Converting JWT error to ApiError with proper status
     if (jwtError.name === 'TokenExpiredError') {
       throw new ApiError(
         StatusCodes.UNAUTHORIZED,
-        'Token has expired. Please login again.'
+        errorMessages.TOKEN.EXPIRED
       );
     }
 
     if (jwtError.name === 'JsonWebTokenError') {
       throw new ApiError(
         StatusCodes.UNAUTHORIZED,
-        'Invalid token. Please login again.'
+        errorMessages.TOKEN.INVALID_TOKEN
       );
     }
 
     // Any other JWT error
     throw new ApiError(
       StatusCodes.UNAUTHORIZED,
-      'Authentication failed. Please login again.'
+      errorMessages.TOKEN.INVALID_TOKEN
     );
   }
 
@@ -82,30 +82,29 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response, next
   try {
     decoded = jwt.verify(token, env.REFRESH_TOKEN_SECRET) as Record<string, any>;
   } catch (jwtError: any) {
-    console.error('Refresh token verification failed:', jwtError.message);
 
     if (jwtError.name === 'TokenExpiredError') {
       throw new ApiError(
         StatusCodes.UNAUTHORIZED,
-        'Refresh token has expired. Please login again.'
+        errorMessages.TOKEN.REFRESH_TOKEN_EXPIRED
       );
     }
 
     if (jwtError.name === 'JsonWebTokenError') {
       throw new ApiError(
         StatusCodes.UNAUTHORIZED,
-        'Invalid refresh token. Please login again.'
+        errorMessages.TOKEN.INVALID_REFRESH_TOKEN
       );
     }
 
     throw new ApiError(
       StatusCodes.UNAUTHORIZED,
-      'Refresh failed. Please login again.'
+      errorMessages.TOKEN.REFRESH_FAILED
     );
   }
 
   if (!decoded || !decoded.id) {
-    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid refresh token payload');
+    throw new ApiError(StatusCodes.UNAUTHORIZED, errorMessages.TOKEN.INVALID_TOKEN);
   }
 
   req.user = { id: decoded.id };

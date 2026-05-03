@@ -11,7 +11,8 @@ const errorMessages = {
     EXIST:
       "The user with same email or username already exists.",
     UNAUTHORIZED: "Unauthorized access.",
-    USER_RESOURCES_MISSING: "Invalid Request, the complete the error meessage pleseeeeeee!!!!"
+    USER_RESOURCES_MISSING: "Invalid Request, Please try again later.",
+    LOGIN_TIME_UPDATE_FAILED: "Failed to update login time. Please try again later.",
   },
   NAME: {
     REQUIRED: "Please provide your name. This field cannot be left empty.",
@@ -21,7 +22,11 @@ const errorMessages = {
   TOKEN: {
     NOT_FOUND: "Unauthorized, Missing Token",
     INVALID_TOKEN: "Unauthorized, Invalid Token",
-    TOKEN_USER_NOT_FOUND: "Unauthorized, user not found!"
+    EXPIRED: "Unauthorized, Token has expired. Please login again.",
+    TOKEN_USER_NOT_FOUND: "Unauthorized, user not found!",
+    REFRESH_TOKEN_EXPIRED: "Refresh token has expired. Please login again.",
+    INVALID_REFRESH_TOKEN: "Invalid refresh token. Please login again.",
+    REFRESH_FAILED: "Refresh failed. Please login again."
   },
   USERNAME: {
     CONFLICT:
