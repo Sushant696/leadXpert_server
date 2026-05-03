@@ -27,14 +27,15 @@ const userSchema = new mongoose.Schema<UserType>({
     type: Boolean,
     default: false,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
   isActive: {
     type: Boolean, default: true,
   },
-
   lastLoginAt: Date,
-
   deletedAt: Date,
-
   onboardingCompleted: {
     type: Boolean,
     default: false,
@@ -42,5 +43,4 @@ const userSchema = new mongoose.Schema<UserType>({
 }, { timestamps: true })
 
 export type UserDocument = HydratedDocument<UserType>;
-
 export const User = mongoose.model<UserType>("User", userSchema)

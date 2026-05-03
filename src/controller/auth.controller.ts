@@ -6,58 +6,93 @@ import ApiError from "../exceptions/apiError";
 import ApiResponse from "../utils/apiResponse";
 import asyncHandler from "../utils/asyncHandler";
 import errorMessages from "../constants/errorMessages";
-import { UserServices } from "../services/auth.service";
+import { AuthServices } from "../services/auth.service";
 import responseMessages from "../constants/responseMessages";
-import { CreateUserDTO, loginUserDTO } from "../dtos/user.dto";
+import { CreateUserDTO, LoginUserDTO } from "../dtos/auth.dto";
 
-const userServices = new UserServices();
+const authServices = new AuthServices();
 
 export class AuthController {
-
   createUser = asyncHandler(async (req: Request, res: Response) => {
     const parsedData = CreateUserDTO.safeParse(req.body);
 
     if (!parsedData.success) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, parsedData.error.message)
+      throw new ApiError(StatusCodes.BAD_REQUEST, parsedData.error.message);
     }
-    const createdUser = await userServices.createUser(parsedData.data)
+    const createdUser = await authServices.createUser(parsedData.data);
 
-    return res.json(new ApiResponse(StatusCodes.CREATED, responseMessages.USER.CREATED, { ...createdUser }));
-  })
+    return res.json(
+      new ApiResponse(StatusCodes.CREATED, responseMessages.USER.CREATED, {
+        ...createdUser,
+      }),
+    );
+  });
 
   loginUser = asyncHandler(async (req: Request, res: Response) => {
-    const parsedData = loginUserDTO.safeParse(req.body);
+    const parsedData = LoginUserDTO.safeParse(req.body);
 
     if (!parsedData.success) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, z.prettifyError(parsedData.error))
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        z.prettifyError(parsedData.error),
+      );
     }
 
-    const { accessToken, refreshToken, user } = await userServices.loginUser(parsedData.data);
+    const { accessToken, refreshToken, user } = await authServices.loginUser(
+      parsedData.data,
+    );
 
-    return res.json(new ApiResponse(StatusCodes.OK, responseMessages.USER.LOGGED_IN, { user, accessToken, refreshToken }));
-  })
+    return res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.USER.LOGGED_IN, {
+        user,
+        accessToken,
+        refreshToken,
+      }),
+    );
+  });
 
   logout = asyncHandler(async (req: Request, res: Response) => {
-
     if (!req.user) {
       throw new ApiError(
         StatusCodes.UNAUTHORIZED,
-        errorMessages.USER.UNAUTHORIZED
+        errorMessages.USER.UNAUTHORIZED,
       );
     }
 
-    return res.json(new ApiResponse(StatusCodes.OK, responseMessages.USER.LOGGED_OUT, {}));
-  })
+    return res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.USER.LOGGED_OUT, {}),
+    );
+  });
+
+  refresh = asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        errorMessages.USER.UNAUTHORIZED,
+      );
+    }
+    const { accessToken, refreshToken } = await authServices.refresh(
+      req.user.id,
+    );
+    res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.USER.REFRESH, {
+        accessToken,
+        refreshToken,
+        user: req.user
+      }),
+    );
+  });
 
   getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
-    console.log("failed to get user")
     if (!req.user) {
       throw new ApiError(
         StatusCodes.UNAUTHORIZED,
-        errorMessages.USER.UNAUTHORIZED
+        errorMessages.USER.UNAUTHORIZED,
       );
     }
-    const currentUser = await userServices.getCurrentUser(req.user.id);
-    return res.json(new ApiResponse(StatusCodes.OK, responseMessages.USER.RETRIEVED, currentUser));
-  })
+    const user = await authServices.getCurrentUser(req.user.id);
+    return res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.USER.RETRIEVED, user),
+    );
+  });
 }

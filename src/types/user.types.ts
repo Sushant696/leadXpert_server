@@ -8,6 +8,7 @@ export const UserSchema = z.object({
   isEmailVerified: z.boolean().default(false),
   role: z.enum(System_Roles).default(System_Roles.USER),
   isActive: z.boolean().default(false),
+  isDeleted: z.boolean().default(false),
   lastLoginAt: z.date(),
   deletedAt: z.date(),
   onboardingCompleted: z.boolean().default(false),
