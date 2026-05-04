@@ -1,8 +1,9 @@
 import ApiError from "./apiError";
 import { logger } from "../infra/logger/pino";
-import type { Request, Response } from "express"
+import type { NextFunction, Request, Response } from "express"
+import { ZodError } from "zod";
 
-const erorrHandler = (err: any, req: Request, res: Response) => {
+const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   // Handle ApiError
   if (err instanceof ApiError) {
     logger.error({
@@ -18,7 +19,7 @@ const erorrHandler = (err: any, req: Request, res: Response) => {
     });
   }
 
-  // Handle JWT errors (shouldn't reach here if middleware is fixed, but just in case)
+  // Handle JWT errors 
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
     logger.error({
       type: 'JWTError',
@@ -46,6 +47,21 @@ const erorrHandler = (err: any, req: Request, res: Response) => {
     });
   }
 
+  // zod error handling
+  if (err instanceof ZodError) {
+    logger.error({
+      type: "ZodError",
+      issues: err.issues,
+      path: req.path,
+    });
+
+    return res.status(400).json({
+      success: false,
+      message: "Invalid request data",
+      errors: err.issues,
+    });
+  }
+
   // Generic errors
   logger.error({
     type: 'UnhandledError',
@@ -60,4 +76,4 @@ const erorrHandler = (err: any, req: Request, res: Response) => {
   });
 }
 
-export default erorrHandler;
+export default errorHandler

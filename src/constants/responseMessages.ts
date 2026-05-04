@@ -9,6 +9,10 @@ const responseMessages = {
     DELETED: "The user has been deleted successfully.",
     REFRESH: "Your session has been refreshed successfully.",
   },
+  UPLOAD: {
+    CREATED: "The image has been created successfully.",
+    DELETED: "The pipeline has been deleted successfully.",
+  },
   MEMBER: {
     DELETED: "The member has been removed successfully.",
     ROLE_UPDATE: "The member's role has been updated successfully.",

@@ -6,10 +6,10 @@ import type { Application, Request, Response } from "express";
 import mainRouter from "./routes";
 import { env } from "./config/env";
 import connectDB from "./config/db";
-import rateLimiter from "./utils/rateLimiter";
 import corsConfig from "./utils/corsConfig";
-import erorrHandler from "./exceptions/errorHandler";
+import rateLimiter from "./utils/rateLimiter";
 import { httpLogger } from "./infra/logger/httpLogger";
+import errorHandler from "./exceptions/errorHandler";
 
 const app: Application = express()
 
@@ -28,6 +28,6 @@ app.get("/", (req: Request, res: Response) => {
 
 connectDB()
 
-app.use(erorrHandler)
+app.use(errorHandler);
 
 export default app
