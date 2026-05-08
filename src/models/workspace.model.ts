@@ -1,5 +1,17 @@
-import mongoose, { HydratedDocument } from "mongoose";
+import slugify from "slugify";
+import mongoose, { HydratedDocument, Types } from "mongoose";
+
 import { WorkspaceType } from "../types/workspace.types";
+
+interface IWorkspace extends Omit<WorkspaceType, "members" | "businessType" | "teamSize"> {
+  name: string;
+  businessType?: string | null;
+  teamSize?: number | null;
+  inviteCode?: string;
+  members: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 const WorkspaceModel = new mongoose.Schema(
   {
@@ -7,6 +19,12 @@ const WorkspaceModel = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
     },
     businessType: {
       type: String,
@@ -20,8 +38,7 @@ const WorkspaceModel = new mongoose.Schema(
     inviteCode: {
       type: String,
       unique: true,
-      required: true,
-      index: true,
+      required: false,
     },
     members: [
       {
@@ -29,39 +46,24 @@ const WorkspaceModel = new mongoose.Schema(
         ref: "Membership",
       },
     ],
-
-    /*
-    // to be implemented later 
-        pipelines: [
-          {
-            type: Types.ObjectId,
-            ref: "Pipeline",
-          },
-        ],
-        contacts: [
-          {
-            type: Types.ObjectId,
-            ref: "Contact",
-          },
-        ],
-        activities: [
-          {
-            type: Types.ObjectId,
-            ref: "Activity",
-          },
-        ],
-        tasks: [
-          {
-            type: Types.ObjectId,
-            ref: "Task",
-          },
-        ],
-      */
   }, {
   timestamps: true,
   versionKey: false,
 }
 )
 
-export type WorkspaceDocument = HydratedDocument<WorkspaceType>;
+// create slug from name before validation
+WorkspaceModel.pre("validate", function() {
+  if (this.isModified("name")) {
+    this.slug = slugify(this.name, {
+      lower: true,
+      strict: true,
+      trim: true,
+    });
+  }
+});
+
+WorkspaceModel.index({ name: "text", businessType: "text" });
+
+export type WorkspaceDocument = HydratedDocument<IWorkspace>;
 export const Workspace = mongoose.model<WorkspaceDocument>("Workspace", WorkspaceModel);

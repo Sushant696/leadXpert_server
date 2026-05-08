@@ -21,7 +21,7 @@ const membershipSchema = new mongoose.Schema(
     },
     workspaceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
+      ref: "Workspace",
       required: true,
     },
     role: {
