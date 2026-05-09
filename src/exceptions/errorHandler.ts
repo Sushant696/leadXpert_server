@@ -2,6 +2,7 @@ import ApiError from "./apiError";
 import { logger } from "../infra/logger/pino";
 import type { NextFunction, Request, Response } from "express"
 import { ZodError } from "zod";
+import { StatusCodes } from "http-status-codes";
 
 const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   // Handle ApiError
@@ -15,6 +16,7 @@ const errorHandler = (err: any, req: Request, res: Response, next: NextFunction)
 
     return res.status(err.status).json({
       success: false,
+      status: err.status,
       message: err.message,
     });
   }
@@ -29,6 +31,7 @@ const errorHandler = (err: any, req: Request, res: Response, next: NextFunction)
 
     return res.status(401).json({
       success: false,
+      status: StatusCodes.UNAUTHORIZED,
       message: 'Invalid or expired token',
     });
   }
@@ -42,6 +45,7 @@ const errorHandler = (err: any, req: Request, res: Response, next: NextFunction)
 
     return res.status(400).json({
       success: false,
+      status: StatusCodes.BAD_REQUEST,
       message: 'Validation failed',
       errors: err.errors
     });
@@ -57,6 +61,7 @@ const errorHandler = (err: any, req: Request, res: Response, next: NextFunction)
 
     return res.status(400).json({
       success: false,
+      status: StatusCodes.BAD_REQUEST,
       message: "Invalid request data",
       errors: err.issues,
     });
@@ -72,6 +77,7 @@ const errorHandler = (err: any, req: Request, res: Response, next: NextFunction)
 
   return res.status(500).json({
     success: false,
+    status: StatusCodes.INTERNAL_SERVER_ERROR,
     message: 'Internal Server Error',
   });
 }

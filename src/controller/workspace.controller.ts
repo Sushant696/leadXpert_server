@@ -12,7 +12,7 @@ const workspaceServices = new WorkspaceServices();
 
 class WorkspaceController {
   createWorkspace = asyncHandler(async (req: Request, res: Response) => {
-   
+
     const user = req.user!;
     if (!user) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, errorMessages.USER.UNAUTHORIZED);
@@ -38,7 +38,14 @@ class WorkspaceController {
     return res.json(new ApiResponse(StatusCodes.OK, "Workspace updated successfully", { updatedWorkspace }))
   })
 
+  getAllWorkspaces = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user!;
+    if (!user) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, errorMessages.USER.UNAUTHORIZED);
+    }
+    const workspaces = await workspaceServices.getAllWorkspacesOfUser(user.id);
+    return res.json(new ApiResponse(StatusCodes.OK, "Workspaces fetched successfully", { workspaces }));
+  })
 }
-
 
 export default WorkspaceController;

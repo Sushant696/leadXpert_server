@@ -6,6 +6,7 @@ const workspaceRouter = Router()
 const workspaceController = new WorkspaceController();
 
 workspaceRouter.post("/", middlewares.isAuthenticated, workspaceController.createWorkspace)
+workspaceRouter.get("/", middlewares.isAuthenticated, workspaceController.getAllWorkspaces)
 workspaceRouter.patch("/:id", middlewares.isAuthenticated, workspaceController.updateWorkspace)
 
 export default workspaceRouter;

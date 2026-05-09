@@ -1,4 +1,6 @@
-import mongoose from "mongoose";
+import slugify from "slugify";
+import mongoose, { Types } from "mongoose";
+import { nanoid } from "nanoid";
 import { StatusCodes } from "http-status-codes";
 
 import ApiError from "../exceptions/apiError";
@@ -20,16 +22,20 @@ class WorkspaceServices {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Workspace with the same name already exists.');
     }
 
+    const baseSlug = slugify(data.name, { lower: true, strict: true });
+    const slug = `${baseSlug}-${nanoid(4)}`;
+
     // starting transaction for atomicity
     const session = await mongoose.startSession();
     try {
-
       session.startTransaction();
       // create workspace
       const workspace = await workspaceRepository.createWorkspace({
+        slug,
         name: data.name,
         businessType: data.businessType,
         teamSize: data.teamSize,
+        owner: new Types.ObjectId(userId),
       }, session);
 
       // create membership
@@ -52,6 +58,17 @@ class WorkspaceServices {
     } finally {
       session.endSession();
     }
+  }
+
+  async getAllWorkspacesOfUser(userId: string) {
+    const memberships = await membershipRespository.findAllWorkspacesOfUser(userId);
+
+    const workspaces = memberships.map((mem) => ({
+      workspace: mem.workspaceId,// this will be populated workspace document
+      role: mem.role,
+    }))
+
+    return workspaces ?? [];
   }
 
   async updateWorkspace(workspaceId: string, data: UpdateUserDTO) {

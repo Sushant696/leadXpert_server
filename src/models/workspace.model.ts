@@ -1,11 +1,12 @@
-import slugify from "slugify";
 import mongoose, { HydratedDocument, Types } from "mongoose";
 
 import { WorkspaceType } from "../types/workspace.types";
 
-interface IWorkspace extends Omit<WorkspaceType, "members" | "businessType" | "teamSize"> {
+export interface IWorkspace extends Omit<WorkspaceType, "members" | "businessType" | "teamSize"> {
   name: string;
   businessType?: string | null;
+  owner: Types.ObjectId;
+  slug: string;
   teamSize?: number | null;
   inviteCode?: string;
   members: Types.ObjectId[];
@@ -23,8 +24,11 @@ const WorkspaceModel = new mongoose.Schema(
     slug: {
       type: String,
       required: true,
-      unique: true,
-      index: true,
+    },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     businessType: {
       type: String,
@@ -38,7 +42,7 @@ const WorkspaceModel = new mongoose.Schema(
     inviteCode: {
       type: String,
       unique: true,
-      required: false,
+      sparse: true,
     },
     members: [
       {
@@ -52,18 +56,9 @@ const WorkspaceModel = new mongoose.Schema(
 }
 )
 
-// create slug from name before validation
-WorkspaceModel.pre("validate", function() {
-  if (this.isModified("name")) {
-    this.slug = slugify(this.name, {
-      lower: true,
-      strict: true,
-      trim: true,
-    });
-  }
-});
-
+WorkspaceModel.index({ slug: 1 }, { unique: true });
 WorkspaceModel.index({ name: "text", businessType: "text" });
+WorkspaceModel.index({ owner: 1, name: 1 }, { unique: true });
 
 export type WorkspaceDocument = HydratedDocument<IWorkspace>;
 export const Workspace = mongoose.model<WorkspaceDocument>("Workspace", WorkspaceModel);
