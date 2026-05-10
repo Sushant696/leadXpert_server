@@ -5,7 +5,7 @@ import { WorkspaceType } from "../types/workspace.types";
 
 interface IWorkspaceRepository {
   createWorkspace(workspaceData: Partial<IWorkspace>, session: ClientSession): Promise<WorkspaceDocument>
-  updateWorkspace(workspaceId: string, workspaceData: Partial<WorkspaceType>): Promise<WorkspaceDocument | null>
+  updateWorkspaceById(workspaceId: string, workspaceData: Partial<WorkspaceType>): Promise<WorkspaceDocument | null>
   findWorkspaceOfUserByName(name: string, userId: string): Promise<WorkspaceDocument | null>
 }
 
@@ -15,7 +15,13 @@ class WorkspaceRepository implements IWorkspaceRepository {
     return workspace[0];
   }
 
-  async updateWorkspace(workspaceId: string, workspaceData: Partial<WorkspaceType>): Promise<WorkspaceDocument | null> {
+  async findWorkspaceById(workspaceId: string): Promise<WorkspaceDocument | null> {
+    const workspace = await Workspace.findById(workspaceId);
+    return workspace;
+  }
+
+  async updateWorkspaceById(workspaceId: string, workspaceData: Partial<WorkspaceType>): Promise<WorkspaceDocument | null> {
+
     const workspace = await Workspace.findByIdAndUpdate(workspaceId, workspaceData, { new: true });
     return workspace;
   }
@@ -24,6 +30,14 @@ class WorkspaceRepository implements IWorkspaceRepository {
   async findWorkspaceOfUserByName(name: string, userId: string): Promise<WorkspaceDocument | null> {
     return await Workspace.findOne({
       name,
+      owner: new Types.ObjectId(userId),
+    });
+  }
+
+  // find workspace by workspaceId and userId
+  async findWorkspaceByWorkspaceAndOwnerId(workspaceId: string, userId: string): Promise<WorkspaceDocument | null> {
+    return await Workspace.findOne({
+      _id: new Types.ObjectId(workspaceId),
       owner: new Types.ObjectId(userId),
     });
   }

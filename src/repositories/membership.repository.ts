@@ -1,6 +1,5 @@
 import { ClientSession } from "mongoose";
-import { Membership } from "../models/membership.model";
-import { MembershipType } from "../types/membership.types";
+import { IMembership, Membership } from "../models/membership.model";
 
 export class MembershipRepository {
   // check if user is member of workspace
@@ -19,7 +18,7 @@ export class MembershipRepository {
   }
 
   // create membership relation between user and workspace
-  async createRelation({ userId, workspaceId, role }: MembershipType, session: ClientSession) {
+  async createRelation({ userId, workspaceId, role }: IMembership, session: ClientSession) {
     const [membership] = await Membership.create(
       [
         {

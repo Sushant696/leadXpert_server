@@ -17,6 +17,12 @@ export const env = {
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
   NODE_ENV: process.env.NODE_ENV ?? "development",
   PORT: process.env.PORT ?? "3000",
+  INVITE_HOURS_TO_EXPIRE: Number(
+    process.env.INVITE_HOURS_TO_EXPIRE ?? 48
+  ),
+  INVITE_DAYS_TO_EXPIRE: Number(
+    process.env.INVITE_DAYS_TO_EXPIRE ?? 15
+  ),
   CLOUDINARY_URL: requiredEnv('CLOUDINARY_URL'),
   CLOUDINARY_NAME: requiredEnv('CLOUDINARY_NAME'),
   CLOUDINARY_API_KEY: requiredEnv('CLOUDINARY_API_KEY'),

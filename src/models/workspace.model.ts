@@ -3,15 +3,13 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 import { WorkspaceType } from "../types/workspace.types";
 
 export interface IWorkspace extends Omit<WorkspaceType, "members" | "businessType" | "teamSize"> {
+  _id: Types.ObjectId;
   name: string;
   businessType?: string | null;
-  owner: Types.ObjectId;
   slug: string;
+  owner: Types.ObjectId;
   teamSize?: number | null;
-  inviteCode?: string;
   members: Types.ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const WorkspaceModel = new mongoose.Schema(
@@ -38,11 +36,6 @@ const WorkspaceModel = new mongoose.Schema(
     teamSize: {
       type: Number,
       default: null,
-    },
-    inviteCode: {
-      type: String,
-      unique: true,
-      sparse: true,
     },
     members: [
       {

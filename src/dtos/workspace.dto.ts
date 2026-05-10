@@ -16,5 +16,9 @@ export const updateWorkspaceDto = WorkspaceSchema.pick({
   teamSize: true,
 }).partial();
 
+export const InvigationByEmailDto = z.object({
+  email: z.string().email("Invalid email address"),
+})
+
 export type CreateWorkspaceDto = z.infer<typeof CreateWorkspaceDto>;
 export type UpdateWorkspaceDto = z.infer<typeof updateWorkspaceDto>; 
