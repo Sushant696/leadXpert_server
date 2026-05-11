@@ -7,6 +7,4 @@ export const MembershipSchema = z.object({
   role: z.enum(Roles),
 });
 
-
-
 export type MembershipType = z.infer<typeof MembershipSchema>

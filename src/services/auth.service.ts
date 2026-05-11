@@ -83,7 +83,7 @@ export class AuthServices {
   async refresh(id: string) {
     const existingUser = await userRepository.getUserById(id);
     if (!existingUser) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, errorMessages.USER.NOT_FOUND);
+      throw new ApiError(StatusCodes.UNAUTHORIZED, errorMessages.USER.NOT_FOUND);
     }
 
     const payload = {

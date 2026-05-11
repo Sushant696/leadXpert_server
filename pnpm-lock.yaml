@@ -41,9 +41,15 @@ importers:
       multer:
         specifier: ^2.0.2
         version: 2.0.2
+      nanoid:
+        specifier: ^5.1.6
+        version: 5.1.6
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
+      slugify:
+        specifier: ^1.6.6
+        version: 1.6.6
       streamifier:
         specifier: ^0.1.1
         version: 0.1.1
@@ -675,6 +681,11 @@ packages:
     resolution: {integrity: sha512-u7f2xaZ/UG8oLXHvtF/oWTRvT44p9ecwBBqTwgJVq0+4BW1g8OW01TyMEGWBHbyMOYVHXslaut7qEQ1meATXgw==}
     engines: {node: '>= 10.16.0'}
 
+  nanoid@5.1.6:
+    resolution: {integrity: sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+
   negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
     engines: {node: '>= 0.6'}
@@ -837,6 +848,10 @@ packages:
   simple-update-notifier@2.0.0:
     resolution: {integrity: sha512-a2B9Y0KlNXl9u/vsW6sTIu9vGEpfKu2wRV6l1H3XEas/0gUIzGzBoP/IouTcUQbm9JWZLH3COxyn03TYlFax6w==}
     engines: {node: '>=10'}
+
+  slugify@1.6.6:
+    resolution: {integrity: sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==}
+    engines: {node: '>=8.0.0'}
 
   sonic-boom@4.2.0:
     resolution: {integrity: sha512-INb7TM37/mAcsGmc9hyyI6+QR3rR1zVRu36B0NeGXKnOOLiZOfER5SA+N7X7k3yUYRzLWafduTDvJAfDswwEww==}
@@ -1543,6 +1558,8 @@ snapshots:
       type-is: 1.6.18
       xtend: 4.0.2
 
+  nanoid@5.1.6: {}
+
   negotiator@0.6.3: {}
 
   nodemon@3.1.11:
@@ -1749,6 +1766,8 @@ snapshots:
   simple-update-notifier@2.0.0:
     dependencies:
       semver: 7.7.3
+
+  slugify@1.6.6: {}
 
   sonic-boom@4.2.0:
     dependencies:

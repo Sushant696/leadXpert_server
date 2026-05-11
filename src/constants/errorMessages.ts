@@ -8,25 +8,38 @@ const errorMessages = {
     DELETION_FAILED: "We couldn't delete the user. Please try again later.",
     INVALID_CREDENTIALS:
       "The credentials provided are incorrect. Please check and try again.",
-    EXIST:
-      "The user with same email or username already exists.",
+    EXIST: "The user with same email or username already exists.",
     UNAUTHORIZED: "Unauthorized access.",
     USER_RESOURCES_MISSING: "Invalid Request, Please try again later.",
-    LOGIN_TIME_UPDATE_FAILED: "Failed to update login time. Please try again later.",
+    LOGIN_TIME_UPDATE_FAILED:
+      "Failed to update login time. Please try again later.",
   },
   NAME: {
     REQUIRED: "Please provide your name. This field cannot be left empty.",
     INVALID:
       "The name entered contains invalid characters. Please use only alphabets.",
   },
+  INVITE: {
+    NOT_FOUND: "The specified invitation does not exist.",
+    INVALID:
+      "The invitation is invalid. Please check the details and try again.",
+    EXPIRED: "The invitation has expired. Please request a new one.",
+    ALREADY_USED: "This invitation has already been used.",
+    CREATION_FAILED: "Failed to create the invitation. Please try again later.",
+    REVOKE_FAILED: "Failed to revoke the invitation. Please try again later.",
+    REVOKED: "The token has been revoked. Please request a new invitation.",
+    MAX_USES_REACHED:
+      "The maximum number of uses for this invitation has been reached.",
+  },
+
   TOKEN: {
     NOT_FOUND: "Unauthorized, Missing Token",
-    INVALID_TOKEN: "Unauthorized, Invalid Token",
+    INVALID_TOKEN: "The token is invalid.",
     EXPIRED: "Unauthorized, Token has expired. Please login again.",
     TOKEN_USER_NOT_FOUND: "Unauthorized, user not found!",
     REFRESH_TOKEN_EXPIRED: "Refresh token has expired. Please login again.",
     INVALID_REFRESH_TOKEN: "Invalid refresh token. Please login again.",
-    REFRESH_FAILED: "Refresh failed. Please login again."
+    REFRESH_FAILED: "Refresh failed. Please login again.",
   },
   USERNAME: {
     CONFLICT:
@@ -58,16 +71,34 @@ const errorMessages = {
       "The request is invalid. Please review your input and try again.",
   },
   MEMBERSHIP: {
-    NOT_MEMBER: "Invalid membership request,make sure you have access to pipeline.",
-    NOT_LOADED: "Membership not loaded. Use checkCompanyMembership middleware first.",
+    NOT_MEMBER:
+      "Invalid membership request,make sure you have access to pipeline.",
+    NOT_LOADED:
+      "Membership not loaded. Use checkCompanyMembership middleware first.",
   },
   WORKSPACE: {
+    CREATE_FAILED: "Failed to create workspace. Please try again later.",
+    UPDATE_FAILED: "Failed to update workspace. Please try again later.",
+    NOT_FOUND: "The specified workspace does not exist.",
+    ALREADY_EXISTS: "A workspace with the same name already exists.",
+    NOT_MEMBER: "You are not a member of this workspace.",
+  },
+  WORkKSPACE_INVITATION: {
+    INVALID: "The invitation link is invalid. Please check and try again.",
+    EXPIRED: "The invitation link has expired. Please request a new one.",
+    ALREADY_USED: "This invitation link has already been used.",
+    NOT_FOUND: "Invitation not found. Please check the link and try again.",
+  },
+  WORKSPACE_MEMBERSHIP: {
+    ALREADY_MEMBER: "You are already a member of this workspace.",
     NOT_MEMBER: "Operation failed, make sure you are member of this workspace.",
-    NOT_LOADED: "Membership not loaded. Use checkCompanyMembership middleware first.",
+    NOT_LOADED:
+      "Membership not loaded. Use checkCompanyMembership middleware first.",
   },
   AUTHORIZATION: {
-    INSUFFICIENT_PERMISSION: "You don't have access right to complete this operation."
-  }
-}
+    INSUFFICIENT_PERMISSION:
+      "You don't have access right to complete this operation.",
+  },
+};
 
-export default errorMessages
+export default errorMessages;

@@ -15,9 +15,7 @@ const userServices = new UserServices();
 class UserController {
 
   updateUser = asyncHandler(async (req: Request, res: Response) => {
-    console.log(req.body, "parsed data")
     const parsedData = UpdateUserDTO.safeParse(req.body);
-    console.log(parsedData.data, "parsed data")
     if (!parsedData.success) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,

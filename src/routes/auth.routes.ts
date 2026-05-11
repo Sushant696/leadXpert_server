@@ -26,6 +26,4 @@ authRouter.post(
 authRouter.post("/login", authcontroller.loginUser)
 authRouter.post("/register", authcontroller.createUser)
 
-
-
 export default authRouter
