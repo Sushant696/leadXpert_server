@@ -19,6 +19,24 @@ const responseMessages = {
   },
   MEMBERSHIP: {
     CREATED: "The membership relation has been created successfully.",
+    DELETED: "The membership relation has been deleted successfully.",
+    UPDATED: "The member role has been updated successfully.",
+  },
+  WORKSPACE: {
+    CREATED: "The workspace has been created successfully.",
+    UPDATED: "The workspace has been updated successfully.",
+    DELETED: "The workspace has been deleted successfully.",
+    RETRIEVED: "The workspace data has been retrieved successfully.",
+    ALLRETRIEVED: "workspaces retrieved successfully.",
+    MEMBERS_RETRIEVED: "The members of the workspace have been retrieved successfully.",
+    INVITATION_LINK_GENERATED:
+      "The invitation link has been generated successfully.",
+    INVITATION_LINK_REVOKED:
+      "The invitation link has been revoked successfully.",
+    INVITATION_LINKS_RETRIEVED:
+      "The invitation links have been retrieved successfully.",
+    JOINED: "You have joined the workspace successfully.",
+    EMAIL_INVITATION_SENT: "The email invitation has been sent successfully.",
   },
   PIPELINE: {
     CREATED: "The pipeline has been created successfully.",
@@ -26,7 +44,6 @@ const responseMessages = {
     DELETED: "The pipeline has been deleted successfully.",
     RETRIEVED: "The pipeline data has been retrieved successfully.",
   },
+};
 
-}
-
-export default responseMessages
+export default responseMessages;

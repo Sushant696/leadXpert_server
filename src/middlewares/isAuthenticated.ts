@@ -15,7 +15,6 @@ const isAuthenticated = asyncHandler(async (req: Request, res: Response, next: N
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new ApiError(StatusCodes.UNAUTHORIZED, errorMessages.USER.UNAUTHORIZED);
   }
-
   const token = authHeader.split(' ')[1];
 
   if (!token) {

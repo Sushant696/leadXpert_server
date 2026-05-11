@@ -1,30 +1,104 @@
 import { Router } from "express";
 import WorkspaceController from "../controller/workspace.controller";
 import { middlewares } from "../middlewares/isAuthenticated";
-import { checkWorkspaceMembership, requiredCompanyRole } from "../middlewares/hasPermission";
+import {
+  checkWorkspaceMembership,
+  requiredCompanyRole,
+} from "../middlewares/hasPermission";
 import { Roles } from "../constants/roles";
 
-const workspaceRouter = Router()
+const workspaceRouter = Router();
 const workspaceController = new WorkspaceController();
 
-workspaceRouter.post("/", middlewares.isAuthenticated, workspaceController.createWorkspace)
-workspaceRouter.get("/", middlewares.isAuthenticated, workspaceController.getAllWorkspaces)
-workspaceRouter.patch("/:workspaceId", middlewares.isAuthenticated, workspaceController.updateWorkspace)
+// WORKSPACE MANAGEMENT
 
-workspaceRouter.post("/:workspaceId/invite/link",
+workspaceRouter.post(
+  "/",
+  middlewares.isAuthenticated,
+  workspaceController.createWorkspace,
+);
+workspaceRouter.get(
+  "/",
+  middlewares.isAuthenticated,
+  workspaceController.getAllWorkspaces,
+);
+workspaceRouter.patch(
+  "/:workspaceId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
+  workspaceController.updateWorkspace,
+);
+workspaceRouter.delete(
+  "/:workspaceId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN]),
+  workspaceController.deleteWorkspace,
+);
+
+// INVITE MANAGEMENT
+
+workspaceRouter.post(
+  "/:workspaceId/invite/link",
   middlewares.isAuthenticated,
   checkWorkspaceMembership,
   requiredCompanyRole([Roles.ADMIN, Roles.SUPER_ADMIN]),
-  workspaceController.getInvitationLink
-)
+  workspaceController.getInvitationLink,
+);
 
-workspaceRouter.post("/:workspaceId/invite/email",
+workspaceRouter.post(
+  "/:workspaceId/invite/email",
   middlewares.isAuthenticated,
   checkWorkspaceMembership,
   requiredCompanyRole([Roles.ADMIN, Roles.SUPER_ADMIN]),
-  workspaceController.getInvitationByEmail
-)
+  workspaceController.getInvitationByEmail,
+);
 
-workspaceRouter.post("/", middlewares.isAuthenticated, workspaceController.updateWorkspace)
+workspaceRouter.post(
+  "/join/:token",
+  middlewares.isAuthenticated,
+  workspaceController.joinWorkspace,
+);
+
+workspaceRouter.get(
+  "/:workspaceId/invites",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.ADMIN, Roles.SUPER_ADMIN]),
+  workspaceController.getActiveInvites,
+);
+
+workspaceRouter.delete(
+  "/:workspaceId/invites/:inviteId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.ADMIN, Roles.SUPER_ADMIN]),
+  workspaceController.revokeInvite,
+);
+
+// MEMBER MANAGEMENT
+workspaceRouter.get(
+  "/:workspaceId/members",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  workspaceController.getWorkspaceMembers
+);
+
+workspaceRouter.patch(
+  "/:workspaceId/members/",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
+  workspaceController.updateMemberRole
+);
+
+workspaceRouter.delete(
+  "/:workspaceId/members/",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.ADMIN, Roles.SUPER_ADMIN]),
+  workspaceController.removeMember
+);
 
 export default workspaceRouter;

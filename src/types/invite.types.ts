@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Roles } from "../constants/roles";
 
 export const WorkspaceInviteSchema = z.object({
   workspaceId: z.string(),
@@ -6,7 +7,7 @@ export const WorkspaceInviteSchema = z.object({
   token: z.string(),
 
   type: z.enum(["EMAIL", "LINK"]),
-  role: z.enum(["ADMIN", "MEMBER"]),
+  role: z.enum(Roles),
 
   // Email invite specific
   email: z.string().email().optional(),

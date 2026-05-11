@@ -6,7 +6,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: Record<string, any> | User
-      membership?: Record<string, any> | MembershipType
+      membership?: Record<string, any> | MembershipType 
     }
   }
 }

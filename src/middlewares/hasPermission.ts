@@ -34,7 +34,6 @@ export const checkWorkspaceMembership = asyncHandler(async (req: Request, res: R
   if (!existingMembership) {
     throw new ApiError(StatusCodes.CONFLICT, errorMessages.WORKSPACE.NOT_MEMBER)
   }
-
   req.membership = existingMembership;
   next();
 })

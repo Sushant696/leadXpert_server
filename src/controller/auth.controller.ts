@@ -44,7 +44,10 @@ export class AuthController {
 
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.USER.LOGGED_IN, {
-        user,
+        user: {
+          id: user._id.toString(),
+          ...user,
+        },
         accessToken,
         refreshToken,
       }),

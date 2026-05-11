@@ -14,7 +14,10 @@ export interface IUserRepository {
   }): Promise<UserDocument[]>;
   getUserByEmail(email: string): Promise<UserDocument | null>;
   createUser(userData: Partial<UserType>): Promise<UserDocument>;
-  findByIdAndUpdateUser(id: string, userData: UserType): Promise<UserDocument | null>;
+  findByIdAndUpdateUser(
+    id: string,
+    userData: UserType,
+  ): Promise<UserDocument | null>;
   getUserWithPasswordByEmail(email: string): Promise<UserDocument | null>;
   getUserById(id: string): Promise<UserDocument | null>;
   updateUserLastLoginAt(id: Types.ObjectId): Promise<UserDocument | null>;
@@ -24,12 +27,14 @@ export interface IUserRepository {
 }
 
 export class UserRepository implements IUserRepository {
-
   async createUser(userData: Partial<UserType>): Promise<UserDocument> {
     return User.create(userData);
   }
 
-  async findByIdAndUpdateUser(id: string, userData: Partial<UserType>): Promise<UserDocument | null> {
+  async findByIdAndUpdateUser(
+    id: string,
+    userData: Partial<UserType>,
+  ): Promise<UserDocument | null> {
     return User.findByIdAndUpdate(id, userData, { new: true });
   }
 
@@ -37,9 +42,13 @@ export class UserRepository implements IUserRepository {
     return User.findOne({ email });
   }
 
-  async getUserById(id: string): Promise<UserDocument | null> { return User.findOne({ _id: id }) }
+  async getUserById(id: string): Promise<UserDocument | null> {
+    return User.findOne({ _id: id });
+  }
 
-  async getUserWithPasswordByEmail(email: string): Promise<UserDocument | null> {
+  async getUserWithPasswordByEmail(
+    email: string,
+  ): Promise<UserDocument | null> {
     return User.findOne({ email }).select("+password");
   }
 
@@ -50,15 +59,20 @@ export class UserRepository implements IUserRepository {
     skip: number;
     limit: number;
   }): Promise<UserDocument[]> {
-
     return User.find({ role: { $ne: System_Roles.ADMIN } })
-      .sort({ createdAt: 'desc' })
+      .sort({ createdAt: "desc" })
       .skip(skip)
       .limit(limit);
   }
 
-  async updateUserLastLoginAt(id: Types.ObjectId): Promise<UserDocument | null> {
-    return User.findByIdAndUpdate(id, { lastLoginAt: new Date() }, { new: true });
+  async updateUserLastLoginAt(
+    id: Types.ObjectId,
+  ): Promise<UserDocument | null> {
+    return User.findByIdAndUpdate(
+      id,
+      { lastLoginAt: new Date() },
+      { new: true },
+    );
   }
 
   async countUsers(): Promise<number> {
@@ -66,11 +80,14 @@ export class UserRepository implements IUserRepository {
   }
 
   async softDeleteUserById(userId: string): Promise<UserDocument | null> {
-    return User.findOneAndUpdate({ _id: userId }, { isDeleted: true }, { new: true });
+    return User.findOneAndUpdate(
+      { _id: userId },
+      { isDeleted: true },
+      { new: true },
+    );
   }
 
   async deleteUserById(userId: string): Promise<UserDocument | null> {
     return User.findOneAndDelete({ _id: userId }, { new: true });
   }
 }
-
