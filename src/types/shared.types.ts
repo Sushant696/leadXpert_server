@@ -184,6 +184,12 @@ export const LostReasonTag = {
 } as const;
 export type LostReasonTag = typeof LostReasonTag[keyof typeof LostReasonTag];
 
+export const PipelineVisibility = {
+  WORKSPACE: "WORKSPACE",
+  PRIVATE: "PRIVATE",
+} as const;
+export type PipelineVisibility = typeof PipelineVisibility[keyof typeof PipelineVisibility];
+
 // ─── Currency 
 export const Currency = {
   NPR: "NPR", USD: "USD",
