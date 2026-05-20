@@ -16,7 +16,7 @@ export interface IWorkspace extends Omit<
   members: Types.ObjectId[];
 }
 
-const WorkspaceModel = new mongoose.Schema(
+const WorkspaceSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -59,9 +59,9 @@ const WorkspaceModel = new mongoose.Schema(
   },
 );
 
-WorkspaceModel.index({ slug: 1 }, { unique: true });
-WorkspaceModel.index({ name: "text", businessType: "text" });
-WorkspaceModel.index(
+WorkspaceSchema.index({ slug: 1 }, { unique: true });
+WorkspaceSchema.index({ name: "text", businessType: "text" });
+WorkspaceSchema.index(
   { owner: 1, name: 1 },
   {
     unique: true,
@@ -72,5 +72,5 @@ WorkspaceModel.index(
 export type WorkspaceDocument = HydratedDocument<IWorkspace>;
 export const Workspace = mongoose.model<WorkspaceDocument>(
   "Workspace",
-  WorkspaceModel,
+  WorkspaceSchema,
 );

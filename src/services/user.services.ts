@@ -1,37 +1,38 @@
 import { StatusCodes } from "http-status-codes";
-import { UpdateUserDTO } from "../dtos/user.dto";
-import { UserRepository } from "../repositories/user.repository";
-import errorMessages from "../constants/errorMessages";
-import ApiError from "../exceptions/apiError";
 
-const userRepository = new UserRepository()
+import ApiError from "../exceptions/apiError";
+import { UpdateUserDTO } from "../dtos/user.dto";
+import errorMessages from "../constants/errorMessages";
+import { UserRepository } from "../repositories/user.repository";
+
+const userRepository = new UserRepository();
 
 class UserServices {
   async UpdateUser(id: string, data: UpdateUserDTO) {
-
-    const existingUser = await userRepository.findByIdAndUpdateUser(id, data);
-
-    if (!existingUser) {
+    const updatedUser = await userRepository.findByIdAndUpdateUser(id, data);
+    if (!updatedUser) {
       throw new ApiError(StatusCodes.NOT_FOUND, errorMessages.USER.NOT_FOUND);
     }
-
-    return existingUser;
+    return updatedUser.toJSON();
   }
 
-  async getAllUsers({ page, limit }: { page: number, limit: number }) {
+  async getAllUsers({ page, limit }: { page: number; limit: number }) {
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([
       userRepository.getAllUsers({ skip, limit }),
-      userRepository.countUsers()
-    ])
+      userRepository.countUsers(),
+    ]);
 
     return {
       users,
       pagination: {
-        page, limit, total, totalPages: Math.ceil(total / limit)
-      }
-    }
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async getUserById(userId: string) {

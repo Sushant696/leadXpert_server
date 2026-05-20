@@ -8,6 +8,13 @@ const responseMessages = {
     RETRIEVED: "User data retrieved successfully.",
     DELETED: "The user has been deleted successfully.",
     REFRESH: "Your session has been refreshed successfully.",
+    FORGOT_PASSWORD:
+      "An email with password reset instructions has been sent successfully.",
+    RESET_PASSWORD: "Your password has been reset successfully.",
+  },
+  VERIFICATION: {
+    VERIFICATION_CODE: "Verification Code has been sent successfully.",
+    EMAIL_VERIFIED: "Email has been verified successfully.",
   },
   UPLOAD: {
     CREATED: "The image has been created successfully.",
@@ -28,7 +35,8 @@ const responseMessages = {
     DELETED: "The workspace has been deleted successfully.",
     RETRIEVED: "The workspace data has been retrieved successfully.",
     ALLRETRIEVED: "workspaces retrieved successfully.",
-    MEMBERS_RETRIEVED: "The members of the workspace have been retrieved successfully.",
+    MEMBERS_RETRIEVED:
+      "The members of the workspace have been retrieved successfully.",
     INVITATION_LINK_GENERATED:
       "The invitation link has been generated successfully.",
     INVITATION_LINK_REVOKED:

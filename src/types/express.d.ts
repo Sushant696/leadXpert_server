@@ -5,8 +5,8 @@ import { MembershipType } from "./membership.types"
 declare global {
   namespace Express {
     interface Request {
-      user?: Record<string, any> | User
-      membership?: Record<string, any> | MembershipType 
+      user?: Record<string | any> | User
+      membership?: Record<string | any> | MembershipType
     }
   }
 }

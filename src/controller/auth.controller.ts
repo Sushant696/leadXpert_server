@@ -19,9 +19,10 @@ export class AuthController {
     if (!parsedData.success) {
       throw new ApiError(StatusCodes.BAD_REQUEST, parsedData.error.message);
     }
+
     const createdUser = await authServices.createUser(parsedData.data);
 
-    return res.json(
+    return res.status(StatusCodes.CREATED).json(
       new ApiResponse(StatusCodes.CREATED, responseMessages.USER.CREATED, {
         ...createdUser,
       }),
@@ -44,10 +45,7 @@ export class AuthController {
 
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.USER.LOGGED_IN, {
-        user: {
-          id: user._id.toString(),
-          ...user,
-        },
+        user,
         accessToken,
         refreshToken,
       }),
@@ -81,7 +79,7 @@ export class AuthController {
       new ApiResponse(StatusCodes.OK, responseMessages.USER.REFRESH, {
         accessToken,
         refreshToken,
-        user: req.user
+        user: req.user,
       }),
     );
   });
@@ -96,6 +94,47 @@ export class AuthController {
     const user = await authServices.getCurrentUser(req.user.id);
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.USER.RETRIEVED, user),
+    );
+  });
+
+  verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+    const { code } = req.body;
+    const user = req.user;
+    await authServices.verifyEmail(code, user?.email);
+
+    res.status(StatusCodes.OK).json(
+      new ApiResponse(StatusCodes.OK, responseMessages.VERIFICATION.EMAIL_VERIFIED, {}),
+    );
+  });
+
+  forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.body;
+    await authServices.forgotPassword(email);
+    res.status(StatusCodes.OK).json(new ApiResponse(StatusCodes.OK, responseMessages.USER.FORGOT_PASSWORD, {}));
+  });
+
+  resetPassword = asyncHandler(async (req: Request, res: Response) => {
+    const { code, email, newPassword } = req.body;
+
+    await authServices.resetPassword(code, email, newPassword);
+
+    res.status(StatusCodes.OK).json(
+      new ApiResponse(StatusCodes.OK, responseMessages.USER.RESET_PASSWORD, {}),
+    );
+  });
+
+  sendVerification = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+    await authServices.sendVerification(user?.email);
+
+    res.status(StatusCodes.OK).json(new ApiResponse(StatusCodes.OK, responseMessages.VERIFICATION.VERIFICATION_CODE, {}));
+  });
+
+  verifyResetCode = asyncHandler(async (req: Request, res: Response) => {
+    const { code, email } = req.body;
+    await authServices.verifyResetCode(code, email);
+    res.status(StatusCodes.OK).json(
+      new ApiResponse(StatusCodes.OK, "Code verified successfully", {})
     );
   });
 }

@@ -401,7 +401,7 @@ class WorkspaceServices {
     }
 
     if (membership.role === role) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, `User is already a ${role}`);
+      throw new ApiError(StatusCodes.BAD_REQUEST, `User already has the role ${role}`);
     }
     const updatedMember = await membershipRespository.updateMembershipRole(
       membership._id,

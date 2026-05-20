@@ -23,6 +23,7 @@ export const env = {
   INVITE_DAYS_TO_EXPIRE: Number(
     process.env.INVITE_DAYS_TO_EXPIRE ?? 15
   ),
+  RESEND_API_KEY: requiredEnv('RESEND_API_KEY'),
   CLOUDINARY_URL: requiredEnv('CLOUDINARY_URL'),
   CLOUDINARY_NAME: requiredEnv('CLOUDINARY_NAME'),
   CLOUDINARY_API_KEY: requiredEnv('CLOUDINARY_API_KEY'),

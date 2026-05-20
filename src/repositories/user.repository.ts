@@ -24,6 +24,11 @@ export interface IUserRepository {
   countUsers(): Promise<number>;
   softDeleteUserById(userId: string): Promise<UserDocument | null>;
   deleteUserById(userId: string): Promise<UserDocument | null>;
+  updateUserPassword(
+    userId: string,
+    password: string,
+  ): Promise<UserDocument | null>;
+  verifyUserEmail(userId: string): Promise<UserDocument | null>;
 }
 
 export class UserRepository implements IUserRepository {
@@ -35,7 +40,7 @@ export class UserRepository implements IUserRepository {
     id: string,
     userData: Partial<UserType>,
   ): Promise<UserDocument | null> {
-    return User.findByIdAndUpdate(id, userData, { new: true });
+    return User.findByIdAndUpdate(id, { $set: userData }, { new: true });
   }
 
   async getUserByEmail(email: string): Promise<UserDocument | null> {
@@ -71,6 +76,29 @@ export class UserRepository implements IUserRepository {
     return User.findByIdAndUpdate(
       id,
       { lastLoginAt: new Date() },
+      { new: true },
+    );
+  }
+
+  async updateUserPassword(
+    userId: string,
+    password: string,
+  ): Promise<UserDocument | null> {
+    return User.findOneAndUpdate(
+      { _id: userId },
+      {
+        password,
+      },
+      { new: true },
+    );
+  }
+
+  async verifyUserEmail(userId: string) {
+    return User.findByIdAndUpdate(
+      userId,
+      {
+        isEmailVerified: true,
+      },
       { new: true },
     );
   }

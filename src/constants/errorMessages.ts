@@ -13,6 +13,10 @@ const errorMessages = {
     USER_RESOURCES_MISSING: "Invalid Request, Please try again later.",
     LOGIN_TIME_UPDATE_FAILED:
       "Failed to update login time. Please try again later.",
+    EMAIL_REQUIRED:
+      "Email is required. Please provide your correct email address.",
+    FORGOT_PASSWORD_EMAIL_FAILED:
+      "Failed to send password reset email. Please try again later.",
   },
   NAME: {
     REQUIRED: "Please provide your name. This field cannot be left empty.",
@@ -47,6 +51,10 @@ const errorMessages = {
     REQUIRED: "Username is required. Please enter a valid username.",
     INVALID:
       "The username format is invalid. Ensure it meets the required criteria.",
+  },
+  VERIFY_TOKEN: {
+    INVALID: "The verification token is invalid. Please try again.",
+    EXPIRED: "The verification token has expired. Please request a new one.",
   },
   EMAIL: {
     CONFLICT:
