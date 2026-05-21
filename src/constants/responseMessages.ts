@@ -51,6 +51,7 @@ const responseMessages = {
     UPDATED: "The pipeline has been updated successfully.",
     DELETED: "The pipeline has been deleted successfully.",
     RETRIEVED: "The pipeline data has been retrieved successfully.",
+    NAME_EXISTS: "A pipeline with the same name already exists in this workspace.",
   },
 };
 

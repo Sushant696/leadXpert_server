@@ -1,0 +1,44 @@
+import { Router } from "express";
+
+import { Roles } from "../constants/roles";
+import { middlewares } from "../middlewares/isAuthenticated";
+import PipelineController from "../controller/pipeline.controller";
+import {
+  checkWorkspaceMembership,
+  requiredCompanyRole,
+} from "../middlewares/hasPermission";
+
+const pipelineRouter = Router();
+const pipelineController = new PipelineController();
+
+// create new pipeline
+pipelineRouter.post(
+  "/:workspaceId/create",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
+  pipelineController.createPipeline,
+);
+
+// pipelines list for sidebar
+pipelineRouter.get("/:workspaceId/all", middlewares.isAuthenticated);
+
+// single pipeline + stages
+pipelineRouter.get(
+  "/:workspaceId/pipelines/:pipelineId",
+  middlewares.isAuthenticated,
+);
+
+// update pipeline
+pipelineRouter.patch(
+  "/:workspaceId/pipelines/:pipelineId/update",
+  middlewares.isAuthenticated,
+);
+
+// delete pipeline (archive)
+pipelineRouter.delete(
+  "/:workspaceId/pipelines/:pipelineId/delete",
+  middlewares.isAuthenticated,
+);
+
+export default pipelineRouter;

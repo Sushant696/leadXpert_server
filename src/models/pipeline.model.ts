@@ -5,7 +5,7 @@ import { PipelineType } from "../types/pipeline.types";
 
 export interface IPipeline extends Omit<
   PipelineType,
-  "workspaceId" | "createdBy" | "memberIds" |
+  "createdBy" | "memberIds" |
   "stageOrder" | "stats" | "description" | "icon"
 > {
   _id: Types.ObjectId;
@@ -18,7 +18,6 @@ export interface IPipeline extends Omit<
   vertical: BusinessVertical;
   visibility: PipelineVisibility;
   isArchived: boolean;
-  isDefault: boolean;
   createdBy: Types.ObjectId;
 
   memberIds: Types.ObjectId[];
@@ -90,10 +89,6 @@ const PipelineSchema = new Schema<IPipeline>(
       default: false,
       index: true,
     },
-    isDefault: {
-      type: Boolean,
-      default: false,
-    },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -119,6 +114,7 @@ PipelineSchema.index(
   { workspaceId: 1, name: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } }
 );
+
 
 export type PipelineDocument = HydratedDocument<IPipeline>;
 export const Pipeline = model<IPipeline>("Pipeline", PipelineSchema);

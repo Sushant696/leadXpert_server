@@ -33,22 +33,18 @@ export const PipelineSchema = z.object({
     .transform((val) => (val === "" ? null : val ?? null)),
 
   currency: z
-    .enum(Object.values(Currency) as [string, ...string[]])
+    .enum(Object.values(Currency))
     .default(Currency.NPR),
 
   vertical: z
-    .enum(Object.values(BusinessVertical) as [string, ...string[]])
+    .enum(Object.values(BusinessVertical))
     .default(BusinessVertical.GENERAL),
 
   visibility: z
-    .enum(Object.values(PipelineVisibility) as [string, ...string[]])
+    .enum(Object.values(PipelineVisibility))
     .default(PipelineVisibility.WORKSPACE),
 
   isArchived: z
-    .boolean()
-    .default(false),
-
-  isDefault: z
     .boolean()
     .default(false),
 
