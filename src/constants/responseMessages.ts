@@ -50,8 +50,15 @@ const responseMessages = {
     CREATED: "The pipeline has been created successfully.",
     UPDATED: "The pipeline has been updated successfully.",
     DELETED: "The pipeline has been deleted successfully.",
-    RETRIEVED: "The pipeline data has been retrieved successfully.",
-    NAME_EXISTS: "A pipeline with the same name already exists in this workspace.",
+    RETRIEVED: "The pipelines has been retrieved successfully.",
+    NAME_EXISTS:
+      "A pipeline with the same name already exists in this workspace.",
+  },
+  PIPELINE_STAGE: {
+    CREATED: "The pipeline stage has been created successfully.",
+    UPDATED: "The pipeline stage has been updated successfully.",
+    DELETED: "The pipeline stage has been deleted successfully.",
+    RETRIEVED: "The pipeline stage has been retrieved successfully.",
   },
 };
 

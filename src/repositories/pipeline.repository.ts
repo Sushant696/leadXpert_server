@@ -17,6 +17,10 @@ interface PipelineRepositoryInterface {
     workspaceId: string,
     name: string,
   ): Promise<PipelineDocument[]>;
+  findPipelineSummariesByWorkspaceId(
+    workspaceId: string,
+  ): Promise<Partial<PipelineDocument>[]>;
+  findPipelineWithStages(pipelineId: string): Promise<PipelineDocument | null>;
 }
 
 class PipelineRepository implements PipelineRepositoryInterface {
@@ -42,11 +46,26 @@ class PipelineRepository implements PipelineRepositoryInterface {
     return Pipeline.find({ workspaceId });
   }
 
+  findPipelineSummariesByWorkspaceId(
+    workspaceId: string,
+  ): Promise<Partial<PipelineDocument>[]> {
+    return Pipeline.find({ workspaceId })
+      .select("_id name color icon workspaceId")
+      .lean();
+  }
+
   findPipelinesByWorkspaceIdAndName(
     workspaceId: string,
     name: string,
   ): Promise<PipelineDocument[]> {
     return Pipeline.find({ workspaceId, name: new RegExp(name, "i") });
+  }
+
+  findPipelineWithStages(pipelineId: string): Promise<PipelineDocument | null> {
+    return Pipeline.findById({ _id: pipelineId }).populate({
+      path: "stageOrder",
+      model: "PipelineStage",
+    });
   }
 
   async deletePipeline(id: string): Promise<void> {

@@ -2,11 +2,7 @@ import { z } from "zod";
 import { StageType } from "./shared.types";
 
 export const PipelineStageSchema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .max(80)
-    .trim(),
+  name: z.string().min(1).max(80).trim(),
 
   description: z
     .string()
@@ -14,22 +10,16 @@ export const PipelineStageSchema = z.object({
     .trim()
     .optional()
     .nullable()
-    .transform((val) => (val === "" ? null : val ?? null)),
+    .transform((val) => (val === "" ? null : (val ?? null))),
 
   color: z
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/)
     .default("#3B82F6"),
 
-  type: z
-    .enum(Object.values(StageType) as [string, ...string[]])
-    .default(StageType.OPEN),
+  type: z.enum(Object.values(StageType)).default(StageType.OPEN),
 
-  probability: z
-    .number()
-    .min(0)
-    .max(100)
-    .default(20),
+  probability: z.number().min(0).max(100).default(20),
 });
 
 export type PipelineStageType = z.infer<typeof PipelineStageSchema>;

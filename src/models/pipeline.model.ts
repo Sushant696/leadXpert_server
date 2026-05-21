@@ -1,7 +1,12 @@
-import { Schema, Types, model, HydratedDocument } from "mongoose";
+import {
+  Schema,
+  Types,
+  model,
+  HydratedDocument
+} from "mongoose";
 
-import { BusinessVertical, Currency, PipelineVisibility } from "../types/shared.types";
 import { PipelineType } from "../types/pipeline.types";
+import { BusinessVertical, Currency, PipelineVisibility } from "../types/shared.types";
 
 export interface IPipeline extends Omit<
   PipelineType,

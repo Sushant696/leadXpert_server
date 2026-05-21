@@ -6,8 +6,10 @@ import errorMessages from "../constants/errorMessages"
 import asyncHandler from "../utils/asyncHandler"
 import { Role_Type } from "../constants/roles"
 import { MembershipRepository } from "../repositories/membership.repository"
+import PipelineRepository from "../repositories/pipeline.repository"
 
 const memRepository = new MembershipRepository();
+const pipelineRepository = new PipelineRepository();
 
 export const systemLevelAccessCheck = (allowedRoles: String[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -54,3 +56,23 @@ export const requiredCompanyRole = (allowedRoles: readonly Role_Type[]) => {
     next();
   })
 }
+
+export const checkPipelinesAccess = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const pipelineId = req.params.pipelineId
+  const workspaceId = req.membership?.workspaceId
+  const pipeline = await pipelineRepository.getPipelineById(pipelineId)
+
+  if (!pipeline) {
+    throw new ApiError(StatusCodes.NOT_FOUND, errorMessages.PIPELINE.NOT_FOUND)
+  }
+  if (pipeline.workspaceId.toString() !== workspaceId.toString()) {
+    throw new ApiError(StatusCodes.FORBIDDEN, errorMessages.AUTHORIZATION.INSUFFICIENT_PERMISSION)
+  }
+
+  req.pipeline = {
+    name: pipeline.name,
+    id: pipeline._id,
+    workspaceId: pipeline.workspaceId
+  }
+  next()
+})

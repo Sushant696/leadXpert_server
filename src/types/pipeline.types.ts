@@ -58,4 +58,12 @@ export const PipelineSchema = z.object({
     .optional(),
 });
 
+const Pipeline = PipelineSchema.pick({
+  name: true
+}).extend({
+  id: z.string(),
+  workspaceId: z.string()
+})
+
+export type Pipeline = z.infer<typeof Pipeline>
 export type PipelineType = z.infer<typeof PipelineSchema>;

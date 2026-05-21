@@ -103,6 +103,14 @@ const errorMessages = {
     NOT_LOADED:
       "Membership not loaded. Use checkCompanyMembership middleware first.",
   },
+  PIPELINE: {
+    NOT_FOUND: "The specified pipeline does not exist.",
+    CREATE_FAILED: "Failed to create pipeline. Please try again later.",
+  },
+  PIPELINE_STAGE: {
+    NOT_FOUND: "The specified pipeline stage does not exist.",
+    CREATE_FAILED: "Failed to create pipeline stage. Please try again later.",
+  },
   AUTHORIZATION: {
     INSUFFICIENT_PERMISSION:
       "You don't have access right to complete this operation.",

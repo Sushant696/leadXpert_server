@@ -4,6 +4,7 @@ import { Roles } from "../constants/roles";
 import { middlewares } from "../middlewares/isAuthenticated";
 import PipelineController from "../controller/pipeline.controller";
 import {
+  checkPipelinesAccess,
   checkWorkspaceMembership,
   requiredCompanyRole,
 } from "../middlewares/hasPermission";
@@ -19,26 +20,37 @@ pipelineRouter.post(
   requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
   pipelineController.createPipeline,
 );
-
-// pipelines list for sidebar
-pipelineRouter.get("/:workspaceId/all", middlewares.isAuthenticated);
-
-// single pipeline + stages
-pipelineRouter.get(
-  "/:workspaceId/pipelines/:pipelineId",
-  middlewares.isAuthenticated,
-);
-
 // update pipeline
 pipelineRouter.patch(
   "/:workspaceId/pipelines/:pipelineId/update",
   middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  checkPipelinesAccess,
+  requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
+  pipelineController.updatePipeline,
 );
 
 // delete pipeline (archive)
 pipelineRouter.delete(
   "/:workspaceId/pipelines/:pipelineId/delete",
   middlewares.isAuthenticated,
+);
+
+// pipelines list for sidebar
+pipelineRouter.get(
+  "/:workspaceId/all",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  pipelineController.getPipelines,
+);
+
+// single pipeline + stages
+pipelineRouter.get(
+  "/:workspaceId/pipelines/:pipelineId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  checkPipelinesAccess,
+  pipelineController.getSinglePipelineWithStages,
 );
 
 export default pipelineRouter;
