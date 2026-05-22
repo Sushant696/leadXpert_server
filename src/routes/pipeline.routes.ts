@@ -46,7 +46,7 @@ pipelineRouter.get(
 
 // single pipeline + stages
 pipelineRouter.get(
-  "/:workspaceId/pipelines/:pipelineId",
+  "/:workspaceId/pipeline/:pipelineId",
   middlewares.isAuthenticated,
   checkWorkspaceMembership,
   checkPipelinesAccess,

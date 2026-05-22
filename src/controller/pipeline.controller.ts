@@ -75,9 +75,13 @@ class PipelineController {
           pipelineId,
         );
       return res.json(
-        new ApiResponse(StatusCodes.OK, responseMessages.PIPELINE.RETRIEVED, {
-          pipeline: pipelineWithStages,
-        }),
+        new ApiResponse(
+          StatusCodes.OK,
+          responseMessages.PIPELINE.SINGLE_RETRIEVED,
+          {
+            pipeline: pipelineWithStages,
+          },
+        ),
       );
     },
   );

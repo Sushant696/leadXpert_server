@@ -1,8 +1,10 @@
+import { Types } from "mongoose";
 import {
   IPipeline,
   Pipeline,
   PipelineDocument,
 } from "../models/pipeline.model";
+import { PipelineStageDocument } from "../models/pipeline-stage.model";
 
 interface PipelineRepositoryInterface {
   getPipelineById(id: string): Promise<PipelineDocument | null>;
@@ -21,6 +23,10 @@ interface PipelineRepositoryInterface {
     workspaceId: string,
   ): Promise<Partial<PipelineDocument>[]>;
   findPipelineWithStages(pipelineId: string): Promise<PipelineDocument | null>;
+  reorderPipelineStages(
+    pipelineId: Types.ObjectId,
+    data: string[],
+  ): Promise<PipelineDocument | null>;
 }
 
 class PipelineRepository implements PipelineRepositoryInterface {
@@ -49,7 +55,7 @@ class PipelineRepository implements PipelineRepositoryInterface {
   findPipelineSummariesByWorkspaceId(
     workspaceId: string,
   ): Promise<Partial<PipelineDocument>[]> {
-    return Pipeline.find({ workspaceId })
+    return Pipeline.find({ workspaceId: new Types.ObjectId(workspaceId) })
       .select("_id name color icon workspaceId")
       .lean();
   }
@@ -66,6 +72,17 @@ class PipelineRepository implements PipelineRepositoryInterface {
       path: "stageOrder",
       model: "PipelineStage",
     });
+  }
+
+  reorderPipelineStages(
+    pipelineId: Types.ObjectId,
+    data: string[],
+  ): Promise<PipelineDocument | null> {
+    return Pipeline.findByIdAndUpdate(
+      pipelineId,
+      { stageOrder: data },
+      { new: true },
+    );
   }
 
   async deletePipeline(id: string): Promise<void> {

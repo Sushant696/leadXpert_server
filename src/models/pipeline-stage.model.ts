@@ -7,8 +7,10 @@ import { PipelineStageType } from "../types/pipeline-stage.types";
  * Fully user-defined. Users create, rename, reorder, delete stages freely.
  */
 
-export interface IPipelineStage extends Omit<PipelineStageType,
-  "pipelineId" | "workspaceId" | "description"> {
+export interface IPipelineStage extends Omit<
+  PipelineStageType,
+  "pipelineId" | "workspaceId" | "description"
+> {
   _id: Types.ObjectId;
   pipelineId: Types.ObjectId;
   workspaceId: Types.ObjectId;
@@ -17,8 +19,6 @@ export interface IPipelineStage extends Omit<PipelineStageType,
   description?: string | null;
   color: string;
   type: StageType;
-  order: number;
-
   /**
    * probability: estimated win likelihood at this stage (0–100).
    * Used for forecasting: forecasted_revenue = Σ(lead.value × probability/100)
@@ -66,11 +66,6 @@ const PipelineStageSchema = new Schema<IPipelineStage>(
       enum: Object.values(StageType),
       default: StageType.OPEN,
     },
-    order: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
     probability: {
       type: Number,
       default: 20,
@@ -80,15 +75,18 @@ const PipelineStageSchema = new Schema<IPipelineStage>(
     leadCount: { type: Number, default: 0 },
     totalValue: { type: Number, default: 0 },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false },
 );
 
 PipelineStageSchema.index({ pipelineId: 1, order: 1 });
 PipelineStageSchema.index({ pipelineId: 1, type: 1 });
 PipelineStageSchema.index(
   { pipelineId: 1, name: 1 },
-  { unique: true, collation: { locale: "en", strength: 2 } }
+  { unique: true, collation: { locale: "en", strength: 2 } },
 );
 
 export type PipelineStageDocument = HydratedDocument<IPipelineStage>;
-export const PipelineStage = model<IPipelineStage>("PipelineStage", PipelineStageSchema);
+export const PipelineStage = model<IPipelineStage>(
+  "PipelineStage",
+  PipelineStageSchema,
+);

@@ -110,6 +110,10 @@ const errorMessages = {
   PIPELINE_STAGE: {
     NOT_FOUND: "The specified pipeline stage does not exist.",
     CREATE_FAILED: "Failed to create pipeline stage. Please try again later.",
+    INVALID_REORDER: "The provided stage order is invalid. Please try again.",
+    REORDER_FAILED: "Failed to reorder pipeline stages. Please try again later.",
+    NAME_EXISTS: "A stage with the same name already exists in this pipeline.",
+    REORDER_SAME_ORDER: "The new stage order is the same as the current order.",
   },
   AUTHORIZATION: {
     INSUFFICIENT_PERMISSION:

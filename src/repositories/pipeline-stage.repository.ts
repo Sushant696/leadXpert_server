@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import {
   IPipelineStage,
   PipelineStage,
@@ -19,6 +19,16 @@ class PipelineStageRepository implements PipelineStageRepository {
   async findById(id: string): Promise<PipelineStageDocument | null> {
     // Implementation to find a pipeline stage by ID
     return null;
+  }
+
+  async findPipelineStagesByPipelineIdandName(
+    pipelineId: string,
+    name: string,
+  ): Promise<PipelineStageDocument | null> {
+    return PipelineStage.findOne({
+      pipelineId,
+      name: new RegExp(`^${name}$`, "i"),
+    });
   }
 
   async findAll(): Promise<PipelineStageDocument[]> {
