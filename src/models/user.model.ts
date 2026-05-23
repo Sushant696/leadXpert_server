@@ -52,11 +52,14 @@ userSchema.index({ isDeleted: 1 });
 // overriding toJSON method to exclude sensitive fields
 userSchema.methods.toJSON = function() {
   const user = this.toObject();
+  user.id = user._id.toString()
+  delete user._id;
   delete user.password;
   delete user.__v;
   delete user.isDeleted;
   return user;
 };
+
 // middleware to exclude soft-deleted users from find queries
 userSchema.pre(
   /^(find|findOne|findOneAndUpdate|update|updateOne)/,

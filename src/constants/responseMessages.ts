@@ -8,6 +8,13 @@ const responseMessages = {
     RETRIEVED: "User data retrieved successfully.",
     DELETED: "The user has been deleted successfully.",
     REFRESH: "Your session has been refreshed successfully.",
+    FORGOT_PASSWORD:
+      "An email with password reset instructions has been sent successfully.",
+    RESET_PASSWORD: "Your password has been reset successfully.",
+  },
+  VERIFICATION: {
+    VERIFICATION_CODE: "Verification Code has been sent successfully.",
+    EMAIL_VERIFIED: "Email has been verified successfully.",
   },
   UPLOAD: {
     CREATED: "The image has been created successfully.",
@@ -28,7 +35,8 @@ const responseMessages = {
     DELETED: "The workspace has been deleted successfully.",
     RETRIEVED: "The workspace data has been retrieved successfully.",
     ALLRETRIEVED: "workspaces retrieved successfully.",
-    MEMBERS_RETRIEVED: "The members of the workspace have been retrieved successfully.",
+    MEMBERS_RETRIEVED:
+      "The members of the workspace have been retrieved successfully.",
     INVITATION_LINK_GENERATED:
       "The invitation link has been generated successfully.",
     INVITATION_LINK_REVOKED:
@@ -42,7 +50,18 @@ const responseMessages = {
     CREATED: "The pipeline has been created successfully.",
     UPDATED: "The pipeline has been updated successfully.",
     DELETED: "The pipeline has been deleted successfully.",
-    RETRIEVED: "The pipeline data has been retrieved successfully.",
+    SINGLE_RETRIEVED: "The pipeline with its stages has been retrieved successfully.",
+    RETRIEVED: "The pipelines has been retrieved successfully.",
+    NAME_EXISTS:
+      "A pipeline with the same name already exists in this workspace.",
+  },
+  PIPELINE_STAGE: {
+    CREATED: "The pipeline stage has been created successfully.",
+    BULK_CREATED: "The pipeline stages has been created successfully.",
+    UPDATED: "The pipeline stage has been updated successfully.",
+    DELETED: "The pipeline stage has been deleted successfully.",
+    RETRIEVED: "The pipeline stage has been retrieved successfully.",
+    REORDERED: "The pipeline stages have been reordered successfully.",
   },
 };
 

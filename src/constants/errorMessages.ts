@@ -13,6 +13,10 @@ const errorMessages = {
     USER_RESOURCES_MISSING: "Invalid Request, Please try again later.",
     LOGIN_TIME_UPDATE_FAILED:
       "Failed to update login time. Please try again later.",
+    EMAIL_REQUIRED:
+      "Email is required. Please provide your correct email address.",
+    FORGOT_PASSWORD_EMAIL_FAILED:
+      "Failed to send password reset email. Please try again later.",
   },
   NAME: {
     REQUIRED: "Please provide your name. This field cannot be left empty.",
@@ -47,6 +51,10 @@ const errorMessages = {
     REQUIRED: "Username is required. Please enter a valid username.",
     INVALID:
       "The username format is invalid. Ensure it meets the required criteria.",
+  },
+  VERIFY_TOKEN: {
+    INVALID: "The verification token is invalid. Please try again.",
+    EXPIRED: "The verification token has expired. Please request a new one.",
   },
   EMAIL: {
     CONFLICT:
@@ -94,6 +102,24 @@ const errorMessages = {
     NOT_MEMBER: "Operation failed, make sure you are member of this workspace.",
     NOT_LOADED:
       "Membership not loaded. Use checkCompanyMembership middleware first.",
+  },
+  PIPELINE: {
+    NOT_FOUND: "The specified pipeline does not exist.",
+    CREATE_FAILED: "Failed to create pipeline. Please try again later.",
+  },
+  PIPELINE_STAGE: {
+    NOT_FOUND: "The specified pipeline stage does not exist.",
+    CREATE_FAILED: "Failed to create pipeline stage. Please try again later.",
+    INVALID_REORDER: "The provided stage order is invalid. Please try again.",
+    REORDER_FAILED: "Failed to reorder pipeline stages. Please try again later.",
+    NAME_EXISTS: "A stage with the same name already exists in this pipeline.",
+    REORDER_SAME_ORDER: "The new stage order is the same as the current order.",
+    UPDATE_FAILED: "Failed to update pipeline stage. Please try again later.",
+    TEMPLATE_FAILED: "Pipeline stages already exist for this pipeline. Failed to bulk create pipeline stages from template.",
+    TEMPLATE_NOT_FOUND: "Template not found, please select a valid template and try again.",
+    PIPELINE_WITH_STAGES: "Cannot delete pipeline with existing stages. Please delete all stages first.",
+    DELETE_FAILED: "Failed to delete pipeline stage. Please try again later.",
+    DELETED: "Pipeline Deleted Successfully"
   },
   AUTHORIZATION: {
     INSUFFICIENT_PERMISSION:
