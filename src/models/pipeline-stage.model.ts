@@ -19,6 +19,7 @@ export interface IPipelineStage extends Omit<
   description?: string | null;
   color: string;
   type: StageType;
+ 
   /**
    * probability: estimated win likelihood at this stage (0–100).
    * Used for forecasting: forecasted_revenue = Σ(lead.value × probability/100)

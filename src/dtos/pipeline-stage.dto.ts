@@ -26,3 +26,10 @@ export const ReorderPipelineStagesDto = z.object({
 });
 
 export type ReorderPipelineStagesDto = z.infer<typeof ReorderPipelineStagesDto>;
+
+
+export const BulkCreatePipelineStagesDto = z.object({
+  id: z.string(),
+});
+
+export type BulkCreatePipelineStagesDto = z.infer<typeof BulkCreatePipelineStagesDto>;

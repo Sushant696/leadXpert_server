@@ -21,6 +21,15 @@ pipelineStageRouter.post(
   pipelineStageController.createPipelineStage,
 );
 
+pipelineStageRouter.post(
+  "/:workspaceId/pipelines/:pipelineId/bulkStage",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  checkPipelinesAccess,
+  requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
+  pipelineStageController.createBulkPipelineStage,
+);
+
 // reorder pipeline stage
 pipelineStageRouter.patch(
   "/:workspaceId/pipelines/:pipelineId/stages/reorder",
@@ -47,7 +56,7 @@ pipelineStageRouter.delete(
   checkWorkspaceMembership,
   checkPipelinesAccess,
   requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
-  pipelineStageController.updatePipelineStage,
+  pipelineStageController.deletePipelineStage,
 );
 
 export default pipelineStageRouter;

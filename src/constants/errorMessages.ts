@@ -114,6 +114,12 @@ const errorMessages = {
     REORDER_FAILED: "Failed to reorder pipeline stages. Please try again later.",
     NAME_EXISTS: "A stage with the same name already exists in this pipeline.",
     REORDER_SAME_ORDER: "The new stage order is the same as the current order.",
+    UPDATE_FAILED: "Failed to update pipeline stage. Please try again later.",
+    TEMPLATE_FAILED: "Pipeline stages already exist for this pipeline. Failed to bulk create pipeline stages from template.",
+    TEMPLATE_NOT_FOUND: "Template not found, please select a valid template and try again.",
+    PIPELINE_WITH_STAGES: "Cannot delete pipeline with existing stages. Please delete all stages first.",
+    DELETE_FAILED: "Failed to delete pipeline stage. Please try again later.",
+    DELETED: "Pipeline Deleted Successfully"
   },
   AUTHORIZATION: {
     INSUFFICIENT_PERMISSION:

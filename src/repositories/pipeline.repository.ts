@@ -18,6 +18,7 @@ interface PipelineRepositoryInterface {
   findPipelinesByWorkspaceIdAndName(
     workspaceId: string,
     name: string,
+    excludeId?: string,
   ): Promise<PipelineDocument[]>;
   findPipelineSummariesByWorkspaceId(
     workspaceId: string,
@@ -63,8 +64,16 @@ class PipelineRepository implements PipelineRepositoryInterface {
   findPipelinesByWorkspaceIdAndName(
     workspaceId: string,
     name: string,
+    excludeId?: string,
   ): Promise<PipelineDocument[]> {
-    return Pipeline.find({ workspaceId, name: new RegExp(name, "i") });
+    const query: Record<string, any> = {
+      workspaceId,
+      name: new RegExp(`^${name}$`, "i"),
+    };
+    if (excludeId) {
+      query._id = { $ne: excludeId };
+    }
+    return Pipeline.find(query);
   }
 
   findPipelineWithStages(pipelineId: string): Promise<PipelineDocument | null> {

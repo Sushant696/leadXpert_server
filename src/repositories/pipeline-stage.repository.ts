@@ -1,4 +1,4 @@
-import { ClientSession, Types } from "mongoose";
+import { ClientSession } from "mongoose";
 import {
   IPipelineStage,
   PipelineStage,
@@ -7,18 +7,25 @@ import {
 
 interface PipelineStageRepository {
   findById(id: string): Promise<PipelineStageDocument | null>;
-  findAll(): Promise<PipelineStageDocument[]>;
+  findAll(pipelineId: string): Promise<PipelineStageDocument[]>;
   create(
     pipelineStage: Partial<IPipelineStage>,
     session: ClientSession,
   ): Promise<PipelineStageDocument | null>;
-  delete(id: string): Promise<void>;
+  bulkCreate(
+    pipelineStages: Partial<IPipelineStage>[],
+    session: ClientSession,
+  ): Promise<PipelineStageDocument[] | null>;
+  delete(id: string, session: ClientSession): Promise<void>;
+  updatePipelineStage(
+    id: string,
+    data: Partial<IPipelineStage>,
+  ): Promise<PipelineStageDocument | null>;
 }
 
 class PipelineStageRepository implements PipelineStageRepository {
   async findById(id: string): Promise<PipelineStageDocument | null> {
-    // Implementation to find a pipeline stage by ID
-    return null;
+    return PipelineStage.findById(id);
   }
 
   async findPipelineStagesByPipelineIdandName(
@@ -31,9 +38,8 @@ class PipelineStageRepository implements PipelineStageRepository {
     });
   }
 
-  async findAll(): Promise<PipelineStageDocument[]> {
-    // Implementation to find all pipeline stages
-    return [];
+  async findAll(pipelineId: string): Promise<PipelineStageDocument[]> {
+    return await PipelineStage.find({ pipelineId }).sort({ createdAt: 1 });
   }
 
   async create(
@@ -46,8 +52,28 @@ class PipelineStageRepository implements PipelineStageRepository {
     return pipelineState[0] || null;
   }
 
-  async delete(id: string): Promise<void> {
-    // Implementation to delete a pipeline stage by ID
+  async bulkCreate(
+    pipelineStages: Partial<IPipelineStage>[],
+    session: ClientSession,
+  ): Promise<PipelineStageDocument[] | null> {
+    const createdPipelineStates = await PipelineStage.insertMany(
+      pipelineStages,
+      {
+        session,
+      },
+    );
+    return createdPipelineStates || null;
+  }
+
+  async updatePipelineStage(
+    id: string,
+    data: Partial<IPipelineStage>,
+  ): Promise<PipelineStageDocument | null> {
+    return await PipelineStage.findByIdAndUpdate(id, data, { new: true });
+  }
+
+  async delete(id: string, session: ClientSession): Promise<void> {
+    await PipelineStage.findByIdAndDelete(id, { session });
   }
 }
 

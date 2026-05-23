@@ -34,6 +34,7 @@ pipelineRouter.patch(
 pipelineRouter.delete(
   "/:workspaceId/pipelines/:pipelineId/delete",
   middlewares.isAuthenticated,
+  pipelineController.deletePipeline,
 );
 
 // pipelines list for sidebar

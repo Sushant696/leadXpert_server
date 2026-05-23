@@ -43,6 +43,7 @@ class PipelineController {
         z.prettifyError(parsedData.error),
       );
     }
+    console.log("Updating pipeline with data:", parsedData.data);
     const updatedPipeline = await pipelineService.updatePipeline(
       pipelineId,
       parsedData.data,
@@ -85,6 +86,14 @@ class PipelineController {
       );
     },
   );
+
+  deletePipeline = asyncHandler(async (req: Request, res: Response) => {
+    const pipelineId = req.params.pipelineId;
+    await pipelineService.deletePipeline(pipelineId);
+    return res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.PIPELINE.DELETED),
+    );
+  })
 }
 
 export default PipelineController;

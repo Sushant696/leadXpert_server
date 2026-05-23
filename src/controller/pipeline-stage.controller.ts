@@ -7,6 +7,7 @@ import ApiResponse from "../utils/apiResponse";
 import asyncHandler from "../utils/asyncHandler";
 import responseMessages from "../constants/responseMessages";
 import {
+  BulkCreatePipelineStagesDto,
   CreatePipelineStageDto,
   ReorderPipelineStagesDto,
   UpdatePipelineStageDto,
@@ -38,6 +39,28 @@ class PipelineStageController {
     );
   });
 
+  createBulkPipelineStage = asyncHandler(async (req: Request, res: Response) => {
+    const { workspaceId } = req.params;
+    const pipeline = req.pipeline!;
+    const parsedData = BulkCreatePipelineStagesDto.safeParse(req.body);
+    if (!parsedData.success) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        z.prettifyError(parsedData.error),
+      );
+    }
+    const createdPipelineStages = await pipelineStageService.createBulkPipelineStage(
+      pipeline,
+      workspaceId,
+      parsedData.data.id,
+    );
+    return res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.PIPELINE_STAGE.BULK_CREATED, {
+        pipelineStage: createdPipelineStages,
+      }),
+    );
+  });
+
   reorderPipelineStage = asyncHandler(async (req: Request, res: Response) => {
     const pipeline = req.pipeline!;
     const parsedData = ReorderPipelineStagesDto.safeParse(req.body);
@@ -64,7 +87,8 @@ class PipelineStageController {
   });
 
   updatePipelineStage = asyncHandler(async (req: Request, res: Response) => {
-    const { pipelineId, workspaceId } = req.params;
+    const pipeline = req.pipeline!;
+    const stageId = req.params.stageId;
     const parsedData = UpdatePipelineStageDto.safeParse(req.body);
 
     if (!parsedData.success) {
@@ -74,8 +98,8 @@ class PipelineStageController {
       );
     }
     const updatePipilineStage = await pipelineStageService.updatePipilineStage(
-      pipelineId,
-      workspaceId,
+      pipeline,
+      stageId,
       parsedData.data,
     );
 
@@ -87,6 +111,21 @@ class PipelineStageController {
       ),
     );
   });
+
+  deletePipelineStage = asyncHandler(async (req: Request, res: Response) => {
+    const pipeline = req.pipeline!;
+    const stageId = req.params.stageId;
+
+    await pipelineStageService.deletePipelineStage(pipeline, stageId);
+
+    return res.json(
+      new ApiResponse(
+        StatusCodes.OK,
+        responseMessages.PIPELINE_STAGE.DELETED,
+      ),
+    );
+  })
+
 }
 
 export default PipelineStageController;

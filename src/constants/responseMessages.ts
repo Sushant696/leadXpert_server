@@ -57,6 +57,7 @@ const responseMessages = {
   },
   PIPELINE_STAGE: {
     CREATED: "The pipeline stage has been created successfully.",
+    BULK_CREATED: "The pipeline stages has been created successfully.",
     UPDATED: "The pipeline stage has been updated successfully.",
     DELETED: "The pipeline stage has been deleted successfully.",
     RETRIEVED: "The pipeline stage has been retrieved successfully.",

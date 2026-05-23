@@ -43,11 +43,13 @@ class PipelineService {
         errorMessages.PIPELINE.NOT_FOUND,
       );
     }
+
     if (data.name && data.name !== pipeline.name) {
       const existingPipelines =
         await pipelineRepository.findPipelinesByWorkspaceIdAndName(
           pipeline.workspaceId.toString(),
           data.name,
+          pipelineId,
         );
       if (existingPipelines.length > 0) {
         throw new ApiError(
@@ -90,6 +92,27 @@ class PipelineService {
       stages: pipelineObj?.stageOrder,
       stageOrder: pipelineObj?.stageOrder.map((s: any) => s._id),
     };
+  }
+
+  async deletePipeline(pipelineId: string) {
+    const pipeline = await pipelineRepository.getPipelineById(pipelineId);
+
+    if (!pipeline) {
+      throw new ApiError(
+        StatusCodes.NOT_FOUND,
+        errorMessages.PIPELINE.NOT_FOUND,
+      );
+    }
+
+    if (pipeline.stageOrder.length > 0) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        errorMessages.PIPELINE_STAGE.PIPELINE_WITH_STAGES,
+      );
+    }
+
+    await pipelineRepository.deletePipeline(pipelineId);
+    return;
   }
 }
 
