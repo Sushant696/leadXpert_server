@@ -20,4 +20,38 @@ contactRouter.post(
   contactController.createContact,
 );
 
+// get all contacts (with search)
+contactRouter.get(
+  "/:workspaceId/contacts",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  contactController.getContacts,
+);
+
+// get single contact
+contactRouter.get(
+  "/:workspaceId/contacts/:contactId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  contactController.getContactById,
+);
+
+// update contact
+contactRouter.patch(
+  "/:workspaceId/contacts/:contactId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN, Roles.AGENT]),
+  contactController.updateContact,
+);
+
+// delete contact
+contactRouter.delete(
+  "/:workspaceId/contacts/:contactId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN, Roles.ADMIN]),
+  contactController.deleteContact,
+);
+
 export default contactRouter;
