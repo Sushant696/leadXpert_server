@@ -63,12 +63,6 @@ const responseMessages = {
     RETRIEVED: "The pipeline stage has been retrieved successfully.",
     REORDERED: "The pipeline stages have been reordered successfully.",
   },
-  CONTACT: {
-    CREATED: "The contact has been created successfully.",
-    UPDATED: "The contact has been updated successfully.",
-    DELETED: "The contact has been deleted successfully.",
-    RETRIEVED: "The contact(s) have been retrieved successfully.",
-  },
 };
 
 export default responseMessages;
