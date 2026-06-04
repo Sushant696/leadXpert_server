@@ -121,6 +121,12 @@ const errorMessages = {
     DELETE_FAILED: "Failed to delete pipeline stage. Please try again later.",
     DELETED: "Pipeline Deleted Successfully"
   },
+  CONTACT: {
+    NOT_FOUND: "The specified contact does not exist.",
+    CREATE_FAILED: "Failed to create contact. Please try again later.",
+    UPDATE_FAILED: "Failed to update contact. Please try again later.",
+    DELETE_FAILED: "Failed to delete contact. Please try again later.",
+  },
   AUTHORIZATION: {
     INSUFFICIENT_PERMISSION:
       "You don't have access right to complete this operation.",
