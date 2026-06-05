@@ -4,7 +4,6 @@ import {
   Pipeline,
   PipelineDocument,
 } from "../models/pipeline.model";
-import { PipelineStageDocument } from "../models/pipeline-stage.model";
 
 interface PipelineRepositoryInterface {
   getPipelineById(id: string): Promise<PipelineDocument | null>;
@@ -28,6 +27,7 @@ interface PipelineRepositoryInterface {
     pipelineId: Types.ObjectId,
     data: string[],
   ): Promise<PipelineDocument | null>;
+  syncPipelineStats(pipelineId: string): Promise<void>;
 }
 
 class PipelineRepository implements PipelineRepositoryInterface {
@@ -96,6 +96,44 @@ class PipelineRepository implements PipelineRepositoryInterface {
 
   async deletePipeline(id: string): Promise<void> {
     await Pipeline.findByIdAndDelete(id);
+  }
+
+  async syncPipelineStats(pipelineId: string): Promise<void> {
+    const { Lead } = await import("../models/lead.model");
+
+    const result = await Lead.aggregate([
+      {
+        $match: {
+          pipelineId: new Types.ObjectId(pipelineId),
+          status: { $ne: "ARCHIVED" },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalLeads: { $sum: 1 },
+          openLeads: { $sum: { $cond: [{ $eq: ["$status", "OPEN"] }, 1, 0] } },
+          wonLeads: { $sum: { $cond: [{ $eq: ["$status", "WON"] }, 1, 0] } },
+          lostLeads: { $sum: { $cond: [{ $eq: ["$status", "LOST"] }, 1, 0] } },
+          totalValue: { $sum: "$value" },
+          wonValue: {
+            $sum: { $cond: [{ $eq: ["$status", "WON"] }, "$value", 0] },
+          },
+        },
+      },
+    ]);
+
+    const stats = result[0] ?? {
+      totalLeads: 0,
+      openLeads: 0,
+      wonLeads: 0,
+      lostLeads: 0,
+      totalValue: 0,
+      wonValue: 0,
+    };
+
+    delete stats._id;
+    await Pipeline.findByIdAndUpdate(pipelineId, { $set: { stats } });
   }
 }
 

@@ -7,9 +7,11 @@ import { CreateLeadDto, UpdateLeadDto } from "../dtos/lead.dto";
 import { ILead } from "../models/lead.model";
 import LeadRepository from "../repositories/lead.repository";
 import PipelineRepository from "../repositories/pipeline.repository";
+import PipelineStageRepository from "../repositories/pipeline-stage.repository";
 
 const leadRepository = new LeadRepository();
 const pipelineRepository = new PipelineRepository();
+const pipelineStageRepository = new PipelineStageRepository()
 
 class LeadService {
   async ensureLeadInPipeline(leadId: string, pipelineId: string) {
@@ -42,6 +44,7 @@ class LeadService {
       );
     }
 
+    // Use explicit stage from payload or fallback to first stage in stageOrder
     const selectedStageId =
       leadData.stageId || pipeline.stageOrder?.[0]?.toString();
     if (!selectedStageId) {
@@ -55,7 +58,7 @@ class LeadService {
       workspaceId: new Types.ObjectId(workspaceId),
       pipelineId: new Types.ObjectId(pipelineId),
       stageId: new Types.ObjectId(selectedStageId),
-      contactId: new Types.ObjectId(leadData.contactId),
+      contactId: leadData.contactId ? new Types.ObjectId(leadData.contactId) : null,
       createdBy: new Types.ObjectId(userId),
       title: leadData.title,
       value: leadData.value,
@@ -70,7 +73,15 @@ class LeadService {
       quickNote: leadData.quickNote,
     });
 
+    await pipelineRepository.syncPipelineStats(pipelineId);
     return lead;
+  }
+
+  async getLeadsByWorkspace(workspaceId: string) {
+    const leads = await leadRepository.getLeadsByworkspaceId(
+      workspaceId
+    );
+    return leads;
   }
 
   async getLeads(pipelineId: string, options?: any) {
@@ -98,7 +109,49 @@ class LeadService {
     };
 
     const updatedLead = await leadRepository.updateLead(leadId, updatePayload);
+    await pipelineRepository.syncPipelineStats(pipelineId);
     return updatedLead;
+  }
+
+  async moveLeadToStage(pipelineId: string, leadId: string, stageId: string) {
+    await this.ensureLeadInPipeline(leadId, pipelineId);
+    const stage = await pipelineStageRepository.findById(stageId);
+    const updatedLead = await leadRepository.moveLeadToStage(leadId, stageId, stage?.name ?? "stage name");
+    return updatedLead;
+  }
+
+  async assignLeadToUser(pipelineId: string, leadId: string, userId: string) {
+    await this.ensureLeadInPipeline(leadId, pipelineId);
+
+    const updatedLead = await leadRepository.assignLeadToUser(leadId, userId);
+    return updatedLead;
+  }
+
+  async convertLeadToDeal(pipelineId: string, leadId: string, userId: string) {
+    await this.ensureLeadInPipeline(leadId, pipelineId);
+
+    const updatedLead = await leadRepository.convertLeadToDeal(leadId, userId);
+    await pipelineRepository.syncPipelineStats(pipelineId);
+    return updatedLead;
+  }
+
+  async markLeadAsLost(
+    pipelineId: string,
+    leadId: string,
+    lostReason?: string,
+  ) {
+    await this.ensureLeadInPipeline(leadId, pipelineId);
+
+    const updatedLead = await leadRepository.markLeadAsLost(leadId, lostReason);
+    await pipelineRepository.syncPipelineStats(pipelineId);
+    return updatedLead;
+  }
+
+  async archiveLead(pipelineId: string, leadId: string) {
+    await this.ensureLeadInPipeline(leadId, pipelineId);
+
+    await leadRepository.deleteLead(leadId);
+    await pipelineRepository.syncPipelineStats(pipelineId);
   }
 }
 

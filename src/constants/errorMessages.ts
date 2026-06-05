@@ -127,6 +127,30 @@ const errorMessages = {
     UPDATE_FAILED: "Failed to update contact. Please try again later.",
     DELETE_FAILED: "Failed to delete contact. Please try again later.",
   },
+  LEAD: {
+    NOT_FOUND: "The specified lead does not exist.",
+    CREATE_FAILED: "Failed to create lead. Please try again later.",
+    UPDATE_FAILED: "Failed to update lead. Please try again later.",
+    DELETE_FAILED: "Failed to delete lead. Please try again later.",
+  },
+  DEAL: {
+    NOT_FOUND: "The specified deal does not exist.",
+    CREATE_FAILED: "Failed to create deal. Please try again later.",
+    UPDATE_FAILED: "Failed to update deal. Please try again later.",
+    DELETE_FAILED: "Failed to delete deal. Please try again later.",
+  },
+  TASK: {
+    NOT_FOUND: "The specified task does not exist.",
+    CREATE_FAILED: "Failed to create task. Please try again later.",
+    UPDATE_FAILED: "Failed to update task. Please try again later.",
+    DELETE_FAILED: "Failed to delete task. Please try again later.",
+  },
+  NOTE: {
+    NOT_FOUND: "The specified note does not exist.",
+    CREATE_FAILED: "Failed to create note. Please try again later.",
+    UPDATE_FAILED: "Failed to update note. Please try again later.",
+    DELETE_FAILED: "Failed to delete note. Please try again later.",
+  },
   AUTHORIZATION: {
     INSUFFICIENT_PERMISSION:
       "You don't have access right to complete this operation.",

@@ -43,7 +43,6 @@ class PipelineController {
         z.prettifyError(parsedData.error),
       );
     }
-    console.log("Updating pipeline with data:", parsedData.data);
     const updatedPipeline = await pipelineService.updatePipeline(
       pipelineId,
       parsedData.data,

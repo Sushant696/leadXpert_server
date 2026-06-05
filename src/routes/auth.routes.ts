@@ -66,7 +66,7 @@ authRouter.post(
 authRouter.post(
   "/verify-reset-code",
   verificationRateLimiter,
-  authcontroller.verifyResetCode
+  authcontroller.verifyResetCode,
 );
 
 export default authRouter;
