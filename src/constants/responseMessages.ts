@@ -63,6 +63,43 @@ const responseMessages = {
     RETRIEVED: "The pipeline stage has been retrieved successfully.",
     REORDERED: "The pipeline stages have been reordered successfully.",
   },
+  CONTACT: {
+    CREATED: "The contact has been created successfully.",
+    UPDATED: "The contact has been updated successfully.",
+    DELETED: "The contact has been deleted successfully.",
+    RETRIEVED: "The contact(s) have been retrieved successfully.",
+  },
+  LEAD: {
+    CREATED: "The lead has been created successfully.",
+    UPDATED: "The lead has been updated successfully.",
+    ARCHIVED: "The lead has been archived successfully.",
+    RETRIEVED: "The lead(s) have been retrieved successfully.",
+    STAGE_MOVED: "The lead has been moved to the stage successfully.",
+    ASSIGNED: "The lead has been assigned successfully.",
+    CONVERTED: "The lead has been converted to a deal successfully.",
+    MARKED_LOST: "The lead has been marked as lost successfully.",
+  },
+  DEAL: {
+    CREATED: "The deal has been created successfully.",
+    UPDATED: "The deal has been updated successfully.",
+    RETRIEVED: "The deal(s) have been retrieved successfully.",
+  },
+  TASK: {
+    CREATED: "The task has been created successfully.",
+    UPDATED: "The task has been updated successfully.",
+    COMPLETED: "The task has been marked as completed successfully.",
+    DELETED: "The task has been deleted successfully.",
+    RETRIEVED: "The task(s) have been retrieved successfully.",
+  },
+  NOTE: {
+    CREATED: "The note has been created successfully.",
+    UPDATED: "The note has been updated successfully.",
+    DELETED: "The note has been deleted successfully.",
+    RETRIEVED: "The note(s) have been retrieved successfully.",
+  },
+  ACTIVITY: {
+    RETRIEVED: "The activity timeline has been retrieved successfully.",
+  },
 };
 
 export default responseMessages;
