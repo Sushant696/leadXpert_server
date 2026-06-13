@@ -443,10 +443,6 @@ class WorkspaceServices {
       session.endSession();
     }
   }
-
-  async getDashboardStats(workspaceId: string) {
-    return await workspaceRepository.getDashboardStats(workspaceId);
-  }
 }
 
 export default WorkspaceServices;

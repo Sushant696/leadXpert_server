@@ -218,18 +218,6 @@ class WorkspaceController {
     );
   });
 
-  getDashboardStats = asyncHandler(async (req: Request, res: Response) => {
-    const { workspaceId } = req.params;
-    const stats = await workspaceServices.getDashboardStats(workspaceId);
-    return res.json(
-      new ApiResponse(
-        StatusCodes.OK,
-        "Dashboard stats retrieved successfully",
-        stats
-      ),
-    );
-  });
-
 }
 
 export default WorkspaceController;

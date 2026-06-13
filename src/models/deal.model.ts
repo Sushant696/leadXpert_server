@@ -13,7 +13,7 @@ export interface IDeal extends Omit<
   workspaceId: Types.ObjectId;
   createdBy: Types.ObjectId;
   leadId: Types.ObjectId;
-  contactId?: Types.ObjectId;
+  contactId: Types.ObjectId;
   pipelineId: Types.ObjectId;
   assignedTo?: Types.ObjectId | null;
 
@@ -57,11 +57,13 @@ const DealSchema = new Schema<IDeal>(
       type: Schema.Types.ObjectId,
       ref: "Lead",
       required: true,
+      index: true,
     },
     contactId: {
       type: Schema.Types.ObjectId,
       ref: "Contact",
       required: true,
+      index: true,
     },
     pipelineId: {
       type: Schema.Types.ObjectId,
