@@ -79,6 +79,11 @@ const responseMessages = {
     CONVERTED: "The lead has been converted to a deal successfully.",
     MARKED_LOST: "The lead has been marked as lost successfully.",
   },
+  DEAL: {
+    CREATED: "The deal has been created successfully.",
+    UPDATED: "The deal has been updated successfully.",
+    RETRIEVED: "The deal(s) have been retrieved successfully.",
+  },
 };
 
 export default responseMessages;

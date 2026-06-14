@@ -133,6 +133,12 @@ const errorMessages = {
     UPDATE_FAILED: "Failed to update lead. Please try again later.",
     DELETE_FAILED: "Failed to delete lead. Please try again later.",
   },
+  DEAL: {
+    NOT_FOUND: "The specified deal does not exist.",
+    CREATE_FAILED: "Failed to create deal. Please try again later.",
+    UPDATE_FAILED: "Failed to update deal. Please try again later.",
+    DELETE_FAILED: "Failed to delete deal. Please try again later.",
+  },
   AUTHORIZATION: {
     INSUFFICIENT_PERMISSION:
       "You don't have access right to complete this operation.",
