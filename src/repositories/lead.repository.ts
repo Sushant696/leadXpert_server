@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
 import { Lead, LeadDocument, ILead } from "../models/lead.model";
-import { LeadStatus } from "../types/shared.types";
 
 interface ILeadRepository {
   createLead(leadData: Partial<ILead>): Promise<LeadDocument>;
@@ -9,9 +8,6 @@ interface ILeadRepository {
     pipelineId: string,
     options?: { stageId?: string; assignedTo?: string; search?: string },
   ): Promise<LeadDocument[]>;
-  getLeadsByworkspaceId(
-    workspaceId: string,
-  ): Promise<LeadDocument[]>;
   updateLead(
     leadId: string,
     leadData: Partial<ILead>,
@@ -19,7 +15,6 @@ interface ILeadRepository {
   moveLeadToStage(
     leadId: string,
     stageId: string,
-    stageName: string
   ): Promise<LeadDocument | null>;
   assignLeadToUser(
     leadId: string,
@@ -46,12 +41,6 @@ class LeadRepository implements ILeadRepository {
       "contactId",
       "name email phone",
     );
-  }
-
-  async getLeadsByworkspaceId(
-    workspaceId: string,
-  ): Promise<LeadDocument[]> {
-    return await Lead.find({ workspaceId })
   }
 
   async getLeadsByPipelineId(
@@ -91,7 +80,6 @@ class LeadRepository implements ILeadRepository {
   async moveLeadToStage(
     leadId: string,
     stageId: string,
-    stageName: string
   ): Promise<LeadDocument | null> {
     const lead = await Lead.findById(leadId);
     if (!lead) return null;
@@ -101,7 +89,7 @@ class LeadRepository implements ILeadRepository {
 
     lead.stageHistory.push({
       stageId: new Types.ObjectId(stageId),
-      stageName: stageName,
+      stageName: "",
       enteredAt: lead.stageEnteredAt,
       exitedAt: now,
       timeSpentMs,
@@ -147,7 +135,7 @@ class LeadRepository implements ILeadRepository {
     return await Lead.findByIdAndUpdate(
       leadId,
       {
-        status: LeadStatus.LOST,
+        status: "lost",
         lostReason,
       },
       { new: true },

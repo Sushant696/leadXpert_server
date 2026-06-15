@@ -3,6 +3,8 @@ import { LeadSchema } from "../types/lead.types";
 
 export const CreateLeadDto = LeadSchema.pick({
   title: true,
+  contactId: true,
+  pipelineId: true,
   stageId: true,
   value: true,
   currency: true,
@@ -12,8 +14,6 @@ export const CreateLeadDto = LeadSchema.pick({
   quickNote: true,
   nextFollowUpAt: true,
   assignedTo: true,
-}).extend({
-  contactId: z.string().optional().nullable(),
 });
 
 export type CreateLeadDto = z.infer<typeof CreateLeadDto>;

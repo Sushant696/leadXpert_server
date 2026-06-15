@@ -37,14 +37,6 @@ workspaceRouter.delete(
   workspaceController.deleteWorkspace,
 );
 
-// DASHBOARD STATS
-workspaceRouter.get(
-  "/:workspaceId/dashboard/stats",
-  middlewares.isAuthenticated,
-  checkWorkspaceMembership,
-  workspaceController.getDashboardStats,
-);
-
 // INVITE MANAGEMENT
 
 workspaceRouter.post(

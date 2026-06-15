@@ -39,17 +39,6 @@ class LeadController {
     );
   });
 
-  getLeadsByWorkspace = asyncHandler(async (req: Request, res: Response) => {
-    const workspaceId = req.params.workspaceId;
-    const leads = await leadService.getLeadsByWorkspace(workspaceId);
-
-    return res.json(
-      new ApiResponse(StatusCodes.OK, responseMessages.LEAD.RETRIEVED, {
-        leads,
-      }),
-    );
-  });
-
   getLeads = asyncHandler(async (req: Request, res: Response) => {
     const pipelineId = req.params.pipelineId;
     const { stageId, assignedTo, search, view, page, limit } = req.query;
@@ -114,6 +103,7 @@ class LeadController {
     const pipelineId = req.params.pipelineId;
     const leadId = req.params.leadId;
     const { stageId } = req.body;
+
     if (!stageId) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "stageId is required");
     }

@@ -22,14 +22,6 @@ leadRouter.post(
   leadController.createLead,
 );
 
-// get all leads by workspace
-leadRouter.get(
-  "/:workspaceId/all",
-  middlewares.isAuthenticated,
-  checkWorkspaceMembership,
-  leadController.getLeadsByWorkspace,
-);
-
 // get all leads (kanban + list view)
 leadRouter.get(
   "/:workspaceId/pipelines/:pipelineId/leads",
