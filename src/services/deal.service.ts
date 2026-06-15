@@ -37,6 +37,13 @@ class DealService {
       );
     }
 
+    if (!lead.contactId) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Lead must have a contact before converting to a deal",
+      );
+    }
+
     const deal = await dealRepository.createDeal({
       workspaceId: new Types.ObjectId(workspaceId),
       createdBy: new Types.ObjectId(userId),
