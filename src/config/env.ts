@@ -29,6 +29,7 @@ export const env = {
   CLOUDINARY_API_KEY: requiredEnv('CLOUDINARY_API_KEY'),
   CLOUDINARY_API_SECRET: requiredEnv('CLOUDINARY_API_SECRET'),
   VERSION: process.env.VERSION ?? "v1",
+  ML_SERVICE_URL: process.env.ML_SERVICE_URL ?? "http://localhost:5001",
   ACCESS_TOKEN_SECRET: requiredEnv("ACCESS_TOKEN_SECRET"),
   REFRESH_TOKEN_SECRET: requiredEnv("REFRESH_TOKEN_SECRET"),
   ACCESS_TOKEN_EXPIRY: requiredEnv("ACCESS_TOKEN_EXPIRY") as StringValue,
