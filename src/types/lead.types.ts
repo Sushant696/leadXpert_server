@@ -11,9 +11,9 @@ import {
 export const LeadSchema = z.object({
   title: z.string().min(1).max(200).trim(),
 
-  contactId: z.string(),
+  contactId: z.string().nullable(),
   pipelineId: z.string(),
-  stageId: z.string(),
+  stageId: z.string().nullable(),
 
   value: z.number().min(0).default(0),
 

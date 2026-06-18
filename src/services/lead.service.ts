@@ -7,9 +7,11 @@ import { CreateLeadDto, UpdateLeadDto } from "../dtos/lead.dto";
 import { ILead } from "../models/lead.model";
 import LeadRepository from "../repositories/lead.repository";
 import PipelineRepository from "../repositories/pipeline.repository";
+import PipelineStageRepository from "../repositories/pipeline-stage.repository";
 
 const leadRepository = new LeadRepository();
 const pipelineRepository = new PipelineRepository();
+const pipelineStageRepository = new PipelineStageRepository()
 
 class LeadService {
   async ensureLeadInPipeline(leadId: string, pipelineId: string) {
@@ -56,7 +58,7 @@ class LeadService {
       workspaceId: new Types.ObjectId(workspaceId),
       pipelineId: new Types.ObjectId(pipelineId),
       stageId: new Types.ObjectId(selectedStageId),
-      contactId: new Types.ObjectId(leadData.contactId),
+      contactId: leadData.contactId ? new Types.ObjectId(leadData.contactId) : null,
       createdBy: new Types.ObjectId(userId),
       title: leadData.title,
       value: leadData.value,
@@ -104,8 +106,8 @@ class LeadService {
 
   async moveLeadToStage(pipelineId: string, leadId: string, stageId: string) {
     await this.ensureLeadInPipeline(leadId, pipelineId);
-
-    const updatedLead = await leadRepository.moveLeadToStage(leadId, stageId);
+    const stage = await pipelineStageRepository.findById(stageId);
+    const updatedLead = await leadRepository.moveLeadToStage(leadId, stageId, stage?.name ?? "stage name");
     return updatedLead;
   }
 

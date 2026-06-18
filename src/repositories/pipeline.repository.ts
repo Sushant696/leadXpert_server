@@ -4,7 +4,6 @@ import {
   Pipeline,
   PipelineDocument,
 } from "../models/pipeline.model";
-import { PipelineStageDocument } from "../models/pipeline-stage.model";
 
 interface PipelineRepositoryInterface {
   getPipelineById(id: string): Promise<PipelineDocument | null>;

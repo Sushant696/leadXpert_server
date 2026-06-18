@@ -84,6 +84,22 @@ const responseMessages = {
     UPDATED: "The deal has been updated successfully.",
     RETRIEVED: "The deal(s) have been retrieved successfully.",
   },
+  TASK: {
+    CREATED: "The task has been created successfully.",
+    UPDATED: "The task has been updated successfully.",
+    COMPLETED: "The task has been marked as completed successfully.",
+    DELETED: "The task has been deleted successfully.",
+    RETRIEVED: "The task(s) have been retrieved successfully.",
+  },
+  NOTE: {
+    CREATED: "The note has been created successfully.",
+    UPDATED: "The note has been updated successfully.",
+    DELETED: "The note has been deleted successfully.",
+    RETRIEVED: "The note(s) have been retrieved successfully.",
+  },
+  ACTIVITY: {
+    RETRIEVED: "The activity timeline has been retrieved successfully.",
+  },
 };
 
 export default responseMessages;

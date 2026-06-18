@@ -24,7 +24,6 @@ class NoteService {
       isPinned: noteData.isPinned,
     });
 
-    // Increment noteCount on the parent entity
     if (noteData.entityType === "LEAD") {
       await Lead.findByIdAndUpdate(noteData.entityId, { $inc: { noteCount: 1 } });
     }
@@ -73,7 +72,6 @@ class NoteService {
       );
     }
 
-    // Decrement noteCount on the parent entity
     if (note.entityType === "LEAD") {
       await Lead.findByIdAndUpdate(note.entityId, { $inc: { noteCount: -1 } });
     }
