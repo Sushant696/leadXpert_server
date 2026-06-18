@@ -13,6 +13,7 @@ import errorHandler from "./exceptions/errorHandler";
 const app: Application = express();
 
 app.use(cors(corsConfig));
+// Generous global limiter (skipped in development — see rateLimiter.ts).
 app.use(rateLimiter);
 app.use(cookieParser());
 app.use(express.json());

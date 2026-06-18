@@ -10,6 +10,7 @@ import leadRouter from "./lead.routes";
 import taskRouter from "./task.routes";
 import noteRouter from "./note.routes";
 import dealRouter from "./deal.routes";
+import { scoringRouter } from "./scoring.router";
 
 const mainRouter = Router();
 
@@ -24,5 +25,6 @@ mainRouter.use("/contact", contactRouter);
 mainRouter.use("/pipeline", pipelineRouter);
 mainRouter.use("/workspace", workspaceRouter);
 mainRouter.use("/pipeline-stage", pipelineStageRouter);
+mainRouter.use("/ml", scoringRouter);
 
 export default mainRouter;
