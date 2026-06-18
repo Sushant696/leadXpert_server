@@ -15,6 +15,7 @@ interface ILeadRepository {
   moveLeadToStage(
     leadId: string,
     stageId: string,
+    stageName: string
   ): Promise<LeadDocument | null>;
   assignLeadToUser(
     leadId: string,
@@ -80,6 +81,7 @@ class LeadRepository implements ILeadRepository {
   async moveLeadToStage(
     leadId: string,
     stageId: string,
+    stageName: string
   ): Promise<LeadDocument | null> {
     const lead = await Lead.findById(leadId);
     if (!lead) return null;
@@ -89,7 +91,7 @@ class LeadRepository implements ILeadRepository {
 
     lead.stageHistory.push({
       stageId: new Types.ObjectId(stageId),
-      stageName: "",
+      stageName: stageName,
       enteredAt: lead.stageEnteredAt,
       exitedAt: now,
       timeSpentMs,

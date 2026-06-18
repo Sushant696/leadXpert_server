@@ -43,7 +43,7 @@ export interface ILead extends Omit<
 > {
   workspaceId: Types.ObjectId;
   createdBy: Types.ObjectId;
-  contactId: Types.ObjectId;
+  contactId?: Types.ObjectId | null;
   pipelineId: Types.ObjectId;
   stageId: Types.ObjectId;
   assignedTo?: Types.ObjectId | null;
@@ -120,7 +120,8 @@ const LeadSchema = new Schema<ILead>(
     contactId: {
       type: Schema.Types.ObjectId,
       ref: "Contact",
-      required: true,
+      required: false,
+      default: null,
       index: true,
     },
     pipelineId: {

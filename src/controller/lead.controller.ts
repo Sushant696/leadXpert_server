@@ -103,7 +103,6 @@ class LeadController {
     const pipelineId = req.params.pipelineId;
     const leadId = req.params.leadId;
     const { stageId } = req.body;
-
     if (!stageId) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "stageId is required");
     }
