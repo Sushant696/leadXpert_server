@@ -44,6 +44,15 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  // Bumped to invalidate all previously issued access/refresh tokens for this
+  // user (logout, password reset). Tokens carry the version they were minted
+  // with; a mismatch against this value means the token has been revoked.
+  // Not `select: false` so auth middleware can read it on every getUserById;
+  // it is stripped from API responses in toJSON below.
+  tokenVersion: {
+    type: Number,
+    default: 0,
+  },
 }, { timestamps: true })
 
 // index for fast lookup of non-deleted users
@@ -57,6 +66,7 @@ userSchema.methods.toJSON = function() {
   delete user.password;
   delete user.__v;
   delete user.isDeleted;
+  delete user.tokenVersion;
   return user;
 };
 

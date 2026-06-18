@@ -1,4 +1,5 @@
 import { Schema, Types, model, HydratedDocument } from "mongoose";
+import { registerLeadScoringHook } from "../hooks/lead.scoring.hook";
 import {
   LeadType,
 } from "../types/lead.types";
@@ -232,6 +233,10 @@ LeadSchema.index({ workspaceId: 1, assignedTo: 1, status: 1 });
 LeadSchema.index({ workspaceId: 1, priority: 1 });
 LeadSchema.index({ workspaceId: 1, mlScore: -1 });
 LeadSchema.index({ contactId: 1 });
+
+// Auto-score leads on create/save and on scoring-relevant updates.
+// Must run before the model is compiled.
+registerLeadScoringHook(LeadSchema);
 
 export type LeadDocument = HydratedDocument<ILead>;
 export const Lead = model<ILead>("Lead", LeadSchema);

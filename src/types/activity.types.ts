@@ -14,7 +14,7 @@ export const ActivitySchema = z.object({
     .optional()
     .nullable(),
 
-  metadata: z.record(z.unknown()).optional().default({}),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 
 export type ActivityTypeSchema = z.infer<typeof ActivitySchema>;

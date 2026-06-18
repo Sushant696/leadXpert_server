@@ -12,6 +12,7 @@ export const UserSchema = z.object({
   lastLoginAt: z.date(),
   deletedAt: z.date(),
   onboardingCompleted: z.boolean().default(false),
+  tokenVersion: z.number().default(0),
 });
 
 const User = UserSchema.pick({
