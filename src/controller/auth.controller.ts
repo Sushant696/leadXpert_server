@@ -60,6 +60,9 @@ export class AuthController {
       );
     }
 
+    // Revoke all tokens for this user server-side (bumps tokenVersion).
+    await authServices.logout(req.user.id);
+
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.USER.LOGGED_OUT, {}),
     );
@@ -74,6 +77,7 @@ export class AuthController {
     }
     const { accessToken, refreshToken } = await authServices.refresh(
       req.user.id,
+      req.user.tokenVersion,
     );
     res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.USER.REFRESH, {
