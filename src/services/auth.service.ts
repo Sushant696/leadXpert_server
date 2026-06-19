@@ -72,6 +72,7 @@ export class AuthServices {
       id: existingUser._id,
       email: existingUser.email,
       role: existingUser.role,
+      tokenVersion: existingUser.tokenVersion ?? 0,
     };
 
     let userForResponse = existingUser;
@@ -96,7 +97,7 @@ export class AuthServices {
     return { accessToken, refreshToken, user };
   }
 
-  async refresh(id: string) {
+  async refresh(id: string, tokenVersion?: number) {
     const existingUser = await userRepository.getUserById(id);
     if (!existingUser) {
       throw new ApiError(
@@ -105,10 +106,21 @@ export class AuthServices {
       );
     }
 
+    // Reject refresh tokens that were revoked (logout / password reset bumps
+    // the user's tokenVersion). Default to 0 so tokens minted before this
+    // field existed still validate.
+    if ((tokenVersion ?? 0) !== (existingUser.tokenVersion ?? 0)) {
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        errorMessages.TOKEN.INVALID_REFRESH_TOKEN,
+      );
+    }
+
     const payload = {
       id: existingUser._id,
       email: existingUser.email,
       role: existingUser.role,
+      tokenVersion: existingUser.tokenVersion ?? 0,
     };
 
     const { accessToken, refreshToken } = GenerateTokens(payload);
@@ -206,6 +218,9 @@ export class AuthServices {
       hashedPassword,
     );
 
+    // Invalidate all existing sessions after a password reset.
+    await userRepository.incrementTokenVersion(user._id.toString());
+
     emailService
       .sendPasswordChangedEmail({
         to: email,
@@ -229,5 +244,8 @@ export class AuthServices {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid or expired code");
   }
 
-  async logout() { }
+  // Revokes every token currently held by the user by bumping tokenVersion.
+  async logout(userId: string) {
+    await userRepository.incrementTokenVersion(userId);
+  }
 }

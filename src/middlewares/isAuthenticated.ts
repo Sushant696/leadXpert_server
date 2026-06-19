@@ -74,6 +74,15 @@ const isAuthenticated = asyncHandler(
       );
     }
 
+    // Revocation check: a token whose version no longer matches the user's
+    // current tokenVersion has been invalidated (logout / password reset).
+    if ((decoded.tokenVersion ?? 0) !== ((user as any).tokenVersion ?? 0)) {
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        errorMessages.TOKEN.INVALID_TOKEN,
+      );
+    }
+
     req.user = user;
     return next();
   },
@@ -134,7 +143,7 @@ const refreshAccessToken = asyncHandler(
       );
     }
 
-    req.user = { id: decoded.id };
+    req.user = { id: decoded.id, tokenVersion: decoded.tokenVersion };
     next();
   },
 );

@@ -29,6 +29,7 @@ export interface IUserRepository {
     password: string,
   ): Promise<UserDocument | null>;
   verifyUserEmail(userId: string): Promise<UserDocument | null>;
+  incrementTokenVersion(userId: string): Promise<UserDocument | null>;
 }
 
 export class UserRepository implements IUserRepository {
@@ -99,6 +100,16 @@ export class UserRepository implements IUserRepository {
       {
         isEmailVerified: true,
       },
+      { new: true },
+    );
+  }
+
+  // Atomically bumps tokenVersion, invalidating every access/refresh token
+  // previously issued to this user (used on logout and password reset).
+  async incrementTokenVersion(userId: string): Promise<UserDocument | null> {
+    return User.findByIdAndUpdate(
+      userId,
+      { $inc: { tokenVersion: 1 } },
       { new: true },
     );
   }

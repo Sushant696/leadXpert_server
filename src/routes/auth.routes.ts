@@ -20,7 +20,11 @@ authRouter.post(
   authcontroller.getCurrentUser,
 );
 
-authRouter.post("/logout", authcontroller.logout);
+authRouter.post(
+  "/logout",
+  middlewares.isAuthenticated,
+  authcontroller.logout,
+);
 
 authRouter.post(
   "/refresh",
