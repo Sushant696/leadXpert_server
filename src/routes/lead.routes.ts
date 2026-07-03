@@ -22,6 +22,14 @@ leadRouter.post(
   leadController.createLead,
 );
 
+// get all leads by workspace
+leadRouter.get(
+  "/:workspaceId/all",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  leadController.getLeadsByWorkspace,
+);
+
 // get all leads (kanban + list view)
 leadRouter.get(
   "/:workspaceId/pipelines/:pipelineId/leads",
@@ -38,6 +46,15 @@ leadRouter.get(
   checkWorkspaceMembership,
   checkPipelinesAccess,
   leadController.getLeadById,
+);
+
+// live updates for a lead (SSE)
+leadRouter.get(
+  "/:workspaceId/pipelines/:pipelineId/leads/:leadId/events",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  checkPipelinesAccess,
+  leadController.streamLeadEvents,
 );
 
 // update lead
