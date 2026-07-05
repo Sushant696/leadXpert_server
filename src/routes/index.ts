@@ -10,6 +10,7 @@ import leadRouter from "./lead.routes";
 import taskRouter from "./task.routes";
 import noteRouter from "./note.routes";
 import dealRouter from "./deal.routes";
+import activityRouter from "./activity.routes";
 import { scoringRouter } from "./scoring.router";
 
 const mainRouter = Router();
@@ -20,6 +21,7 @@ mainRouter.use("/leads", leadRouter);
 mainRouter.use("/deals", dealRouter);
 mainRouter.use("/tasks", taskRouter);
 mainRouter.use("/notes", noteRouter);
+mainRouter.use("/activities", activityRouter);
 mainRouter.use("/upload", uploadRouter);
 mainRouter.use("/contact", contactRouter);
 mainRouter.use("/pipeline", pipelineRouter);

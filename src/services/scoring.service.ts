@@ -21,6 +21,7 @@ import { Lead, LeadDocument } from "../models/lead.model";
 import { PipelineStage } from "../models/pipeline-stage.model";
 import { Pipeline } from "../models/pipeline.model";
 import { env } from "../config/env";
+import { emitLeadEvent } from "../lib/eventBus";
 
 // ── Flask microservice URL (internal only)
 const ML_SERVICE_URL = env.ML_SERVICE_URL;
@@ -224,6 +225,8 @@ export async function scoreLead(lead: LeadDocument): Promise<ScoreResult | null>
         },
       }
     );
+
+    emitLeadEvent(String(lead._id), "score");
 
     return result;
   } catch (err) {
