@@ -7,6 +7,7 @@ import { CreateTaskDto, UpdateTaskDto } from "../dtos/task.dto";
 import { ITask } from "../models/task.model";
 import TaskRepository from "../repositories/task.repository";
 import { Lead } from "../models/lead.model";
+import { emitLeadEvent } from "../lib/eventBus";
 
 const taskRepository = new TaskRepository();
 
@@ -35,6 +36,7 @@ class TaskService {
     // Increment taskCount on the parent entity
     if (taskData.entityType === "LEAD") {
       await Lead.findByIdAndUpdate(taskData.entityId, { $inc: { taskCount: 1 } });
+      emitLeadEvent(taskData.entityId, "task");
     }
 
     return task;
@@ -89,6 +91,11 @@ class TaskService {
     };
 
     const updatedTask = await taskRepository.updateTask(taskId, updatePayload);
+
+    if (task.entityType === "LEAD") {
+      emitLeadEvent(task.entityId.toString(), "task");
+    }
+
     return updatedTask;
   }
 
@@ -107,6 +114,11 @@ class TaskService {
     }
 
     const completedTask = await taskRepository.completeTask(taskId, userId);
+
+    if (task.entityType === "LEAD") {
+      emitLeadEvent(task.entityId.toString(), "task");
+    }
+
     return completedTask;
   }
 
@@ -127,6 +139,7 @@ class TaskService {
     // Decrement taskCount on the parent entity
     if (task.entityType === "LEAD") {
       await Lead.findByIdAndUpdate(task.entityId, { $inc: { taskCount: -1 } });
+      emitLeadEvent(task.entityId.toString(), "task");
     }
 
     await taskRepository.deleteTask(taskId);

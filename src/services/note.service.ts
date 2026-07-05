@@ -6,6 +6,7 @@ import errorMessages from "../constants/errorMessages";
 import { CreateNoteDto, UpdateNoteDto } from "../dtos/note.dto";
 import NoteRepository from "../repositories/note.repository";
 import { Lead } from "../models/lead.model";
+import { emitLeadEvent } from "../lib/eventBus";
 
 const noteRepository = new NoteRepository();
 
@@ -26,6 +27,7 @@ class NoteService {
 
     if (noteData.entityType === "LEAD") {
       await Lead.findByIdAndUpdate(noteData.entityId, { $inc: { noteCount: 1 } });
+      emitLeadEvent(noteData.entityId, "note");
     }
 
     return note;
@@ -55,6 +57,11 @@ class NoteService {
     }
 
     const updatedNote = await noteRepository.updateNote(noteId, data);
+
+    if (note.entityType === "LEAD") {
+      emitLeadEvent(note.entityId.toString(), "note");
+    }
+
     return updatedNote;
   }
 
@@ -74,6 +81,7 @@ class NoteService {
 
     if (note.entityType === "LEAD") {
       await Lead.findByIdAndUpdate(note.entityId, { $inc: { noteCount: -1 } });
+      emitLeadEvent(note.entityId.toString(), "note");
     }
 
     await noteRepository.deleteNote(noteId);
