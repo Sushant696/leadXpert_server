@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
 import { Lead, LeadDocument, ILead } from "../models/lead.model";
-import { LeadStatus } from "../types/shared.types";
 
 interface ILeadRepository {
   createLead(leadData: Partial<ILead>): Promise<LeadDocument>;
@@ -34,7 +33,6 @@ interface ILeadRepository {
     lostReason?: string,
   ): Promise<LeadDocument | null>;
   deleteLead(leadId: string): Promise<void>;
-  incrementActivityCount(leadId: string): Promise<void>;
 }
 
 class LeadRepository implements ILeadRepository {
@@ -43,20 +41,16 @@ class LeadRepository implements ILeadRepository {
   }
 
   async getLeadById(leadId: string): Promise<LeadDocument | null> {
-    return await Lead.findById(leadId)
-      .populate("contactId", "name email phone")
-      .populate("stageId", "name order")
-      .populate("assignedTo", "name email");
+    return await Lead.findById(leadId).populate(
+      "contactId",
+      "name email phone",
+    );
   }
 
   async getLeadsByworkspaceId(
     workspaceId: string,
   ): Promise<LeadDocument[]> {
     return await Lead.find({ workspaceId })
-      .populate("contactId", "name email phone")
-      .populate("stageId", "name order")
-      .populate("assignedTo", "name email")
-      .sort({ createdAt: -1 });
   }
 
   async getLeadsByPipelineId(
@@ -152,7 +146,7 @@ class LeadRepository implements ILeadRepository {
     return await Lead.findByIdAndUpdate(
       leadId,
       {
-        status: LeadStatus.LOST,
+        status: "lost",
         lostReason,
       },
       { new: true },
@@ -161,10 +155,6 @@ class LeadRepository implements ILeadRepository {
 
   async deleteLead(leadId: string): Promise<void> {
     await Lead.findByIdAndDelete(leadId);
-  }
-
-  async incrementActivityCount(leadId: string): Promise<void> {
-    await Lead.findByIdAndUpdate(leadId, { $inc: { activityCount: 1 } });
   }
 }
 
