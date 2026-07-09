@@ -29,6 +29,9 @@ const responseMessages = {
     DELETED: "The membership relation has been deleted successfully.",
     UPDATED: "The member role has been updated successfully.",
   },
+  INSIGHTS: {
+    RETRIEVED: "Insights data retrieved successfully.",
+  },
   WORKSPACE: {
     CREATED: "The workspace has been created successfully.",
     UPDATED: "The workspace has been updated successfully.",

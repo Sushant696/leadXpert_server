@@ -12,6 +12,7 @@ import noteRouter from "./note.routes";
 import dealRouter from "./deal.routes";
 import activityRouter from "./activity.routes";
 import { scoringRouter } from "./scoring.router";
+import insightsRouter from "./insights.routes";
 
 const mainRouter = Router();
 
@@ -28,5 +29,6 @@ mainRouter.use("/pipeline", pipelineRouter);
 mainRouter.use("/workspace", workspaceRouter);
 mainRouter.use("/pipeline-stage", pipelineStageRouter);
 mainRouter.use("/ml", scoringRouter);
+mainRouter.use("/insights", insightsRouter);
 
 export default mainRouter;
