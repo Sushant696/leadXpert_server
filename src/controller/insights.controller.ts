@@ -42,7 +42,11 @@ class InsightsController {
 
   getScoreCalibration = asyncHandler(async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
-    const calibration = await insightsService.getScoreCalibration(workspaceId);
+    const pipelineId = req.query.pipelineId as string | undefined;
+    const calibration = await insightsService.getScoreCalibration(
+      workspaceId,
+      pipelineId,
+    );
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.INSIGHTS.RETRIEVED, {
         calibration,
@@ -52,7 +56,11 @@ class InsightsController {
 
   getConfusionMatrix = asyncHandler(async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
-    const matrix = await insightsService.getConfusionMatrix(workspaceId);
+    const pipelineId = req.query.pipelineId as string | undefined;
+    const matrix = await insightsService.getConfusionMatrix(
+      workspaceId,
+      pipelineId,
+    );
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.INSIGHTS.RETRIEVED, matrix),
     );
@@ -60,7 +68,11 @@ class InsightsController {
 
   getPriorityMismatch = asyncHandler(async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
-    const leads = await insightsService.getPriorityMismatch(workspaceId);
+    const pipelineId = req.query.pipelineId as string | undefined;
+    const leads = await insightsService.getPriorityMismatch(
+      workspaceId,
+      pipelineId,
+    );
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.INSIGHTS.RETRIEVED, {
         leads,
@@ -71,7 +83,8 @@ class InsightsController {
 
   getAtRiskValue = asyncHandler(async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
-    const atRisk = await insightsService.getAtRiskValue(workspaceId);
+    const pipelineId = req.query.pipelineId as string | undefined;
+    const atRisk = await insightsService.getAtRiskValue(workspaceId, pipelineId);
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.INSIGHTS.RETRIEVED, atRisk),
     );
@@ -88,13 +101,42 @@ class InsightsController {
     );
   });
 
+  // Insights page "What actually drives a sale" — static, not pipeline-scoped.
+  getDriverRanking = asyncHandler(async (_req: Request, res: Response) => {
+    const drivers = insightsService.getDriverRanking();
+    return res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.INSIGHTS.RETRIEVED, drivers),
+    );
+  });
+
   getSourcePerformance = asyncHandler(async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
-    const sources = await insightsService.getSourcePerformance(workspaceId);
+    const pipelineId = req.query.pipelineId as string | undefined;
+    const sources = await insightsService.getSourcePerformance(
+      workspaceId,
+      pipelineId,
+    );
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.INSIGHTS.RETRIEVED, {
         sources,
       }),
+    );
+  });
+
+  // Insights page "Where deals fall apart" — pipeline-scoped.
+  getLossStageBreakdown = asyncHandler(async (req: Request, res: Response) => {
+    const { workspaceId } = req.params;
+    const pipelineId = req.query.pipelineId as string | undefined;
+    const breakdown = await insightsService.getLossStageBreakdown(
+      workspaceId,
+      pipelineId,
+    );
+    return res.json(
+      new ApiResponse(
+        StatusCodes.OK,
+        responseMessages.INSIGHTS.RETRIEVED,
+        breakdown,
+      ),
     );
   });
 }

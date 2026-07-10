@@ -77,4 +77,20 @@ insightsRouter.get(
   insightsController.getSourcePerformance,
 );
 
+insightsRouter.get(
+  "/:workspaceId/driver-ranking",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN]),
+  insightsController.getDriverRanking,
+);
+
+insightsRouter.get(
+  "/:workspaceId/loss-stage-breakdown",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  requiredCompanyRole([Roles.SUPER_ADMIN]),
+  insightsController.getLossStageBreakdown,
+);
+
 export default insightsRouter;
