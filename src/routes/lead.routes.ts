@@ -48,15 +48,6 @@ leadRouter.get(
   leadController.getLeadById,
 );
 
-// live updates for a lead (SSE)
-leadRouter.get(
-  "/:workspaceId/pipelines/:pipelineId/leads/:leadId/events",
-  middlewares.isAuthenticated,
-  checkWorkspaceMembership,
-  checkPipelinesAccess,
-  leadController.streamLeadEvents,
-);
-
 // update lead
 leadRouter.patch(
   "/:workspaceId/pipelines/:pipelineId/leads/:leadId",

@@ -1,3 +1,5 @@
+import path from "path"
+
 import dotenv from "dotenv"
 import type { StringValue } from "ms"
 
@@ -30,6 +32,15 @@ export const env = {
   CLOUDINARY_API_SECRET: requiredEnv('CLOUDINARY_API_SECRET'),
   VERSION: process.env.VERSION ?? "v1",
   ML_SERVICE_URL: process.env.ML_SERVICE_URL ?? "http://localhost:5001",
+  // Path to the ml-service's static model_comparison.json (source of the
+  // driver-ranking feature importances). Defaults to the sibling ml-service
+  // repo relative to the server's working directory; override in prod.
+  ML_MODEL_COMPARISON_PATH:
+    process.env.ML_MODEL_COMPARISON_PATH ??
+    path.resolve(
+      process.cwd(),
+      "../leadXpert_ml_service/training/model_comparison.json",
+    ),
   ACCESS_TOKEN_SECRET: requiredEnv("ACCESS_TOKEN_SECRET"),
   REFRESH_TOKEN_SECRET: requiredEnv("REFRESH_TOKEN_SECRET"),
   ACCESS_TOKEN_EXPIRY: requiredEnv("ACCESS_TOKEN_EXPIRY") as StringValue,
