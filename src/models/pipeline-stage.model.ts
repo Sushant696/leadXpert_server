@@ -80,10 +80,26 @@ const PipelineStageSchema = new Schema<IPipelineStage>(
 );
 
 PipelineStageSchema.index({ pipelineId: 1, order: 1 });
-PipelineStageSchema.index({ pipelineId: 1, type: 1 });
 PipelineStageSchema.index(
   { pipelineId: 1, name: 1 },
   { unique: true, collation: { locale: "en", strength: 2 } },
+);
+
+// A pipeline may have at most ONE terminal stage of each type — a single WON
+// column and a single LOST column. OPEN stages are unrestricted. Enforced at
+// the DB level with a partial unique index (applies only to WON/LOST rows), and
+// mirrored by service-level validation for friendly error messages. This also
+// replaces the previous non-unique { pipelineId, type } index (type is only
+// ever queried for the terminal WON/LOST stages, which this index still serves).
+PipelineStageSchema.index(
+  { pipelineId: 1, type: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      type: { $in: [StageType.WON, StageType.LOST] },
+    },
+    name: "uniq_terminal_stage_type_per_pipeline",
+  },
 );
 
 export type PipelineStageDocument = HydratedDocument<IPipelineStage>;
