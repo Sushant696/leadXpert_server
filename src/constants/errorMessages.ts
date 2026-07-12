@@ -119,7 +119,11 @@ const errorMessages = {
     TEMPLATE_NOT_FOUND: "Template not found, please select a valid template and try again.",
     PIPELINE_WITH_STAGES: "Cannot delete pipeline with existing stages. Please delete all stages first.",
     DELETE_FAILED: "Failed to delete pipeline stage. Please try again later.",
-    DELETED: "Pipeline Deleted Successfully"
+    DELETED: "Pipeline Deleted Successfully",
+    WON_TYPE_EXISTS:
+      "This pipeline already has a Won stage. A pipeline can only have one Won stage.",
+    LOST_TYPE_EXISTS:
+      "This pipeline already has a Lost stage. A pipeline can only have one Lost stage.",
   },
   CONTACT: {
     NOT_FOUND: "The specified contact does not exist.",
@@ -132,12 +136,20 @@ const errorMessages = {
     CREATE_FAILED: "Failed to create lead. Please try again later.",
     UPDATE_FAILED: "Failed to update lead. Please try again later.",
     DELETE_FAILED: "Failed to delete lead. Please try again later.",
+    STAGE_NOT_FOUND: "The target stage does not exist.",
+    LOST_DETAILS_REQUIRED:
+      "A lost reason and a lost reason tag are required to move this lead to a Lost stage.",
   },
   DEAL: {
     NOT_FOUND: "The specified deal does not exist.",
     CREATE_FAILED: "Failed to create deal. Please try again later.",
     UPDATE_FAILED: "Failed to update deal. Please try again later.",
     DELETE_FAILED: "Failed to delete deal. Please try again later.",
+    ALREADY_EXISTS:
+      "This lead already has a deal — it cannot be converted again.",
+    ALREADY_CONVERTED: "This lead has already been converted to a deal.",
+    DETAILS_REQUIRED:
+      "Deal details are required to convert this lead into a deal.",
   },
   TASK: {
     NOT_FOUND: "The specified task does not exist.",
