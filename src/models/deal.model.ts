@@ -13,7 +13,7 @@ export interface IDeal extends Omit<
   workspaceId: Types.ObjectId;
   createdBy: Types.ObjectId;
   leadId: Types.ObjectId;
-  contactId?: Types.ObjectId;
+  contactId?: Types.ObjectId | null;
   pipelineId: Types.ObjectId;
   assignedTo?: Types.ObjectId | null;
 
@@ -58,10 +58,13 @@ const DealSchema = new Schema<IDeal>(
       ref: "Lead",
       required: true,
     },
+    // Optional — mirrors Lead.contactId, which is also optional. A deal can be
+    // created from a lead that never had a contact attached.
     contactId: {
       type: Schema.Types.ObjectId,
       ref: "Contact",
-      required: true,
+      required: false,
+      default: null,
     },
     pipelineId: {
       type: Schema.Types.ObjectId,

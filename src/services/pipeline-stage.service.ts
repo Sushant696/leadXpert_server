@@ -9,17 +9,78 @@ import {
   UpdatePipelineStageDto,
 } from "../dtos/pipeline-stage.dto";
 import { Pipeline, PipelineDocument } from "../models/pipeline.model";
+import { PipelineStage } from "../models/pipeline-stage.model";
 import PipelineRepository from "../repositories/pipeline.repository";
 import PipelineStageRepository from "../repositories/pipeline-stage.repository";
 import {
   STARTER_TEMPLATES,
   TemplateIdLookup,
 } from "../constants/pipeline-stage-constants";
+import { StageType } from "../types/shared.types";
 
 const pipelineRepository = new PipelineRepository();
 const pipelintStageRepository = new PipelineStageRepository();
 
+// A pipeline can have only one WON and one LOST stage. This guards the
+// create/update paths with a friendly error before the DB unique index would
+// otherwise reject the write with an opaque duplicate-key error.
+const TERMINAL_TYPE_ERRORS: Partial<Record<StageType, string>> = {
+  [StageType.WON]: errorMessages.PIPELINE_STAGE.WON_TYPE_EXISTS,
+  [StageType.LOST]: errorMessages.PIPELINE_STAGE.LOST_TYPE_EXISTS,
+};
+
 class PipelineStageService {
+  /**
+   * Throws if the pipeline already has a terminal (WON/LOST) stage of the given
+   * type, excluding `excludeStageId` (used on update so a stage doesn't clash
+   * with itself).
+   */
+  private async assertTerminalTypeAvailable(
+    pipelineId: string,
+    type: StageType | undefined,
+    excludeStageId?: string,
+  ) {
+    if (type !== StageType.WON && type !== StageType.LOST) return;
+
+    const query: Record<string, unknown> = { pipelineId, type };
+    if (excludeStageId) {
+      query._id = { $ne: excludeStageId };
+    }
+
+    const clashing = await PipelineStage.findOne(query);
+    if (clashing) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        TERMINAL_TYPE_ERRORS[type] as string,
+      );
+    }
+  }
+
+  /**
+   * Part 2 — surfaces a non-blocking warning when a pipeline is missing a WON
+   * and/or LOST stage. Leads can never be won or lost without the matching
+   * terminal stage, so the UI nudges the user to add one. Returns an array of
+   * human-readable warning strings (empty when both terminal stages exist).
+   */
+  async getMissingTerminalStageWarnings(pipelineId: string): Promise<string[]> {
+    const stages = await pipelintStageRepository.findAll(pipelineId);
+    const types = new Set(stages.map((s) => s.type));
+    const warnings: string[] = [];
+
+    if (!types.has(StageType.WON)) {
+      warnings.push(
+        "This pipeline has no Won stage — leads cannot be converted to deals until you add one.",
+      );
+    }
+    if (!types.has(StageType.LOST)) {
+      warnings.push(
+        "This pipeline has no Lost stage — leads cannot be marked as lost until you add one.",
+      );
+    }
+
+    return warnings;
+  }
+
   async createPipelineStage(
     pipeline: PipelineDocument,
     workspaceId: string,
@@ -37,6 +98,9 @@ class PipelineStageService {
         errorMessages.PIPELINE_STAGE.NAME_EXISTS,
       );
     }
+
+    // Only one WON and one LOST stage allowed per pipeline.
+    await this.assertTerminalTypeAvailable(pipeline._id.toString(), data.type);
 
     const session = await mongoose.startSession();
     try {
@@ -65,7 +129,15 @@ class PipelineStageService {
       );
       await session.commitTransaction();
 
-      return { ...createdPipelineStage.toObject(), pipeline: updatedPipeline };
+      const warnings = await this.getMissingTerminalStageWarnings(
+        pipeline._id.toString(),
+      );
+
+      return {
+        ...createdPipelineStage.toObject(),
+        pipeline: updatedPipeline,
+        warnings,
+      };
     } catch (error) {
       await session.abortTransaction();
       throw error;
@@ -190,6 +262,17 @@ class PipelineStageService {
         );
       }
     }
+
+    // Changing a stage's type into WON/LOST must not collide with an existing
+    // terminal stage of the same type (excluding this stage itself).
+    if (data.type && data.type !== existingStage.type) {
+      await this.assertTerminalTypeAvailable(
+        pipeline._id.toString(),
+        data.type,
+        stageId,
+      );
+    }
+
     const updatedPipelineStage =
       await pipelintStageRepository.updatePipelineStage(stageId, data);
 

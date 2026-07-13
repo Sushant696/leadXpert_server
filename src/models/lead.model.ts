@@ -73,6 +73,12 @@ export interface ILead extends Omit<
   convertedAt?: Date | null;
   convertedBy?: Types.ObjectId | null;
 
+  // Denormalized "this lead has a Deal" flag. Set true when a Deal is created
+  // for the lead and NEVER reset — even if the lead is later reopened. This is
+  // the permanent, read-side marker the frontend uses to block a second
+  // conversion; the Deal.leadId unique index is the authoritative backstop.
+  hasDeal: boolean;
+
   // Lost reason
   lostReason?: string | null;
   lostReasonTag?: LostReasonTag | null;
@@ -198,6 +204,7 @@ const LeadSchema = new Schema<ILead>(
     isConverted: { type: Boolean, default: false, index: true },
     convertedAt: { type: Date, default: null },
     convertedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    hasDeal: { type: Boolean, default: false },
 
     lostReason: { type: String, default: null, maxlength: 500 },
     lostReasonTag: {
