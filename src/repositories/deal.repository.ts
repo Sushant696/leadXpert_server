@@ -4,6 +4,7 @@ import { Deal, DealDocument, IDeal } from "../models/deal.model";
 interface IDealRepository {
   createDeal(dealData: Partial<IDeal>): Promise<DealDocument>;
   getDealById(dealId: string): Promise<DealDocument | null>;
+  getDealByLeadId(leadId: string): Promise<DealDocument | null>;
   getDealsByWorkspaceId(
     workspaceId: string,
     options?: { assignedTo?: string; search?: string; status?: string },
@@ -21,6 +22,11 @@ class DealRepository implements IDealRepository {
     return await Deal.findById(dealId)
       .populate("contactId", "name email phone")
       .populate("assignedTo", "name email");
+  }
+
+  // Deal.leadId carries a unique index, so at most one deal exists per lead.
+  async getDealByLeadId(leadId: string): Promise<DealDocument | null> {
+    return await Deal.findOne({ leadId });
   }
 
   async getDealsByWorkspaceId(

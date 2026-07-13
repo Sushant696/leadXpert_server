@@ -30,30 +30,36 @@ class DealService {
       );
     }
 
-    if (lead.isConverted) {
+    // A lead can only ever have one deal — the Deal.leadId unique index is the
+    // authoritative guard; this is the friendly pre-check.
+    const existingDeal = await dealRepository.getDealByLeadId(dealData.leadId);
+    if (existingDeal) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        "Lead has already been converted to a deal",
+        errorMessages.DEAL.ALREADY_EXISTS,
       );
     }
 
-    if (!lead.contactId) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        "Lead must have a contact before converting to a deal",
-      );
-    }
-
+    // contactId is optional now (mirrors Lead.contactId) — a deal can be made
+    // from a lead that has no contact attached.
     const deal = await dealRepository.createDeal({
       workspaceId: new Types.ObjectId(workspaceId),
       createdBy: new Types.ObjectId(userId),
       leadId: new Types.ObjectId(dealData.leadId),
-      contactId: lead.contactId,
+      contactId: lead.contactId ?? null,
       pipelineId: lead.pipelineId,
       title: lead.title,
       value: lead.value,
       currency: lead.currency,
       assignedTo: lead.assignedTo,
+    });
+
+    // Keep the lead's denormalized markers in sync.
+    await leadRepository.updateLead(dealData.leadId, {
+      hasDeal: true,
+      isConverted: true,
+      convertedAt: new Date(),
+      convertedBy: new Types.ObjectId(userId),
     });
 
     return deal;

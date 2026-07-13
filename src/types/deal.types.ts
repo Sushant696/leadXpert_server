@@ -5,7 +5,7 @@ export const DealSchema = z.object({
   title: z.string().min(1).max(200).trim(),
 
   leadId: z.string(),
-  contactId: z.string(),
+  contactId: z.string().optional().nullable(),
   pipelineId: z.string(),
 
   value: z.number().min(0).default(0),
