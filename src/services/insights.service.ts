@@ -1,5 +1,3 @@
-import fs from "fs";
-
 import { Types } from "mongoose";
 
 import { Lead } from "../models/lead.model";
@@ -11,8 +9,6 @@ import {
   MODEL_METRICS,
   MODEL_NAME,
 } from "../constants/modelFeatureImportance";
-import { DRIVER_LABELS } from "../constants/driverLabels";
-import { env } from "../config/env";
 
 const MISSING_TIER = "UNSCORED";
 const SCORE_TIERS = [
@@ -21,40 +17,7 @@ const SCORE_TIERS = [
   LeadPriority.LOW,
 ] as const;
 
-// Statuses that count as "resolved" (a known outcome exists).
-const RESOLVED_STATUSES = [LeadStatus.WON, LeadStatus.LOST] as const;
-// Statuses that are terminal and excluded from "still open" queries.
-const CLOSED_STATUSES = [
-  LeadStatus.WON,
-  LeadStatus.LOST,
-  LeadStatus.ARCHIVED,
-] as const;
-
-// Cached feature importances read once from the static model_comparison.json.
-let cachedDriverImportances:
-  | { feature: string; importance: number }[]
-  | null = null;
-
 class InsightsService {
-  /**
-   * Builds the base Lead match filter for a super-admin insights query.
-   * When pipelineId is present (and not the "all" sentinel), every query is
-   * scoped to { workspaceId, pipelineId }; otherwise it aggregates across the
-   * whole workspace. workspaceId is always enforced, so a pipelineId from a
-   * different workspace simply yields no rows (no cross-tenant leakage).
-   */
-  private baseScope(
-    workspaceId: string,
-    pipelineId?: string,
-  ): Record<string, unknown> {
-    const scope: Record<string, unknown> = {
-      workspaceId: new Types.ObjectId(workspaceId),
-    };
-    if (pipelineId && pipelineId !== "all") {
-      scope.pipelineId = new Types.ObjectId(pipelineId);
-    }
-    return scope;
-  }
   // ── Dashboard widget (all roles): leads to work today ──
   async getHotLeadsToday(workspaceId: string, days = 3) {
     const workspaceObjectId = new Types.ObjectId(workspaceId);
@@ -184,39 +147,17 @@ class InsightsService {
 
   // ── Insights page (super admin only) ──
 
-  async getScoreCalibration(workspaceId: string, pipelineId?: string) {
-    const scope = this.baseScope(workspaceId, pipelineId);
+  async getScoreCalibration(workspaceId: string) {
+    const workspaceObjectId = new Types.ObjectId(workspaceId);
 
     const rows = await Lead.aggregate([
-      { $match: scope },
+      { $match: { workspaceId: workspaceObjectId } },
       {
         $group: {
           _id: { $ifNull: ["$mlPriority", MISSING_TIER] },
           total: { $sum: 1 },
           converted: { $sum: { $cond: ["$isConverted", 1, 0] } },
           lost: { $sum: { $cond: [{ $eq: ["$status", LeadStatus.LOST] }, 1, 0] } },
-          // Resolved = WON or LOST — the only leads with a known outcome. The
-          // Insights "Is our scoring working?" card rates each tier on these
-          // only, so open leads (no outcome yet) don't dilute the rate.
-          resolvedTotal: {
-            $sum: {
-              $cond: [{ $in: ["$status", RESOLVED_STATUSES] }, 1, 0],
-            },
-          },
-          resolvedConverted: {
-            $sum: {
-              $cond: [
-                {
-                  $and: [
-                    "$isConverted",
-                    { $in: ["$status", RESOLVED_STATUSES] },
-                  ],
-                },
-                1,
-                0,
-              ],
-            },
-          },
         },
       },
     ]);
@@ -226,8 +167,6 @@ class InsightsService {
       const total = row?.total ?? 0;
       const converted = row?.converted ?? 0;
       const lost = row?.lost ?? 0;
-      const resolvedTotal = row?.resolvedTotal ?? 0;
-      const resolvedConverted = row?.resolvedConverted ?? 0;
       return {
         tier,
         total,
@@ -236,13 +175,6 @@ class InsightsService {
         open: total - converted - lost,
         conversionRate:
           total > 0 ? Number(((converted / total) * 100).toFixed(1)) : 0,
-        // Resolved-only figures (the ones the Insights page renders).
-        resolvedTotal,
-        resolvedConverted,
-        resolvedConversionRate:
-          resolvedTotal > 0
-            ? Number(((resolvedConverted / resolvedTotal) * 100).toFixed(1))
-            : 0,
       };
     });
   }
@@ -253,11 +185,13 @@ class InsightsService {
   // HIGH, set at scoring time in scoring.service.ts). Only resolved leads
   // (converted or explicitly lost) are included — an open lead's true label
   // isn't known yet, so it can't count toward a confusion matrix.
-  async getConfusionMatrix(workspaceId: string, pipelineId?: string) {
+  async getConfusionMatrix(workspaceId: string) {
+    const workspaceObjectId = new Types.ObjectId(workspaceId);
+
     const rows = await Lead.aggregate([
       {
         $match: {
-          ...this.baseScope(workspaceId, pipelineId),
+          workspaceId: workspaceObjectId,
           mlPriority: { $ne: null },
           $or: [{ isConverted: true }, { status: LeadStatus.LOST }],
         },
@@ -318,21 +252,21 @@ class InsightsService {
     };
   }
 
-  async getPriorityMismatch(workspaceId: string, pipelineId?: string) {
+  async getPriorityMismatch(workspaceId: string) {
+    const workspaceObjectId = new Types.ObjectId(workspaceId);
+
     const leads = await Lead.find({
-      ...this.baseScope(workspaceId, pipelineId),
+      workspaceId: workspaceObjectId,
       mlPriority: { $ne: null },
       isConverted: false,
-      status: { $nin: CLOSED_STATUSES },
+      status: { $nin: [LeadStatus.LOST, LeadStatus.ARCHIVED] },
       $expr: { $ne: ["$mlPriority", "$priority"] },
     })
       .sort({ mlScore: -1 })
       .limit(200)
       .populate("contactId", "name")
       .populate("assignedTo", "name")
-      .select(
-        "title value currency mlScore mlPriority priority lastContactedAt contactId assignedTo",
-      )
+      .select("title value currency mlScore mlPriority priority contactId assignedTo")
       .lean();
 
     return leads.map((lead) => ({
@@ -343,28 +277,33 @@ class InsightsService {
       mlScore: lead.mlScore,
       mlPriority: lead.mlPriority,
       humanPriority: lead.priority,
-      lastContactedAt: lead.lastContactedAt ?? null,
       contactName: (lead.contactId as any)?.name ?? null,
       assignedToName: (lead.assignedTo as any)?.name ?? null,
     }));
   }
 
-  async getAtRiskValue(workspaceId: string, pipelineId?: string) {
-    // Rotten leads that are still open (not yet WON/LOST/archived) — a lead
-    // that already resolved isn't "at risk" any more.
-    const atRiskMatch = {
-      ...this.baseScope(workspaceId, pipelineId),
-      isRotten: true,
-      status: { $nin: CLOSED_STATUSES },
-    };
+  async getAtRiskValue(workspaceId: string) {
+    const workspaceObjectId = new Types.ObjectId(workspaceId);
 
     const [overall, byStage] = await Promise.all([
       Lead.aggregate([
-        { $match: atRiskMatch },
+        {
+          $match: {
+            workspaceId: workspaceObjectId,
+            isRotten: true,
+            isConverted: false,
+          },
+        },
         { $group: { _id: null, count: { $sum: 1 }, value: { $sum: "$value" } } },
       ]),
       Lead.aggregate([
-        { $match: atRiskMatch },
+        {
+          $match: {
+            workspaceId: workspaceObjectId,
+            isRotten: true,
+            isConverted: false,
+          },
+        },
         { $group: { _id: "$stageId", count: { $sum: 1 }, value: { $sum: "$value" } } },
         {
           $lookup: {
@@ -403,9 +342,11 @@ class InsightsService {
     };
   }
 
-  async getSourcePerformance(workspaceId: string, pipelineId?: string) {
+  async getSourcePerformance(workspaceId: string) {
+    const workspaceObjectId = new Types.ObjectId(workspaceId);
+
     const rows = await Lead.aggregate([
-      { $match: this.baseScope(workspaceId, pipelineId) },
+      { $match: { workspaceId: workspaceObjectId } },
       {
         $group: {
           _id: { $ifNull: ["$source", "UNKNOWN"] },
@@ -415,116 +356,33 @@ class InsightsService {
           avgMlScore: { $avg: "$mlScore" },
         },
       },
+      { $sort: { total: -1 } },
     ]);
 
-    return rows
-      .map((r) => ({
-        source: r._id as string,
-        total: r.total,
-        converted: r.converted,
-        conversionRate:
-          r.total > 0 ? Number(((r.converted / r.total) * 100).toFixed(1)) : 0,
-        avgValue: Math.round(r.avgValue ?? 0),
-        avgMlScore: Math.round(r.avgMlScore ?? 0),
-      }))
-      // Best converters first (ties broken by volume) — the Insights card
-      // ranks sources by conversion rate descending.
-      .sort((a, b) => b.conversionRate - a.conversionRate || b.total - a.total);
+    return rows.map((r) => ({
+      source: r._id as string,
+      total: r.total,
+      converted: r.converted,
+      conversionRate:
+        r.total > 0 ? Number(((r.converted / r.total) * 100).toFixed(1)) : 0,
+      avgValue: Math.round(r.avgValue ?? 0),
+      avgMlScore: Math.round(r.avgMlScore ?? 0),
+    }));
   }
 
-  // ── Driver ranking (static, NOT pipeline-scoped) ──
-  // Reads the trained model's feature_importances from the static
-  // model_comparison.json, translates each technical feature name into a
-  // plain-English label, and returns the top factors with a relative weight
-  // normalized to 0-100 (top factor = 100). The same file backs every
-  // pipeline, so pipelineId is intentionally ignored here.
-  getDriverRanking() {
-    const importances = this.loadDriverImportances();
-
-    const ranked = importances
-      .filter((f) => DRIVER_LABELS[f.feature])
-      .sort((a, b) => b.importance - a.importance)
-      .slice(0, 6);
-
-    const max = ranked[0]?.importance ?? 0;
-
-    return {
-      drivers: ranked.map((f) => ({
-        label: DRIVER_LABELS[f.feature],
-        weight: max > 0 ? Math.round((f.importance / max) * 100) : 0,
-      })),
-    };
-  }
-
-  private loadDriverImportances(): { feature: string; importance: number }[] {
-    if (cachedDriverImportances) return cachedDriverImportances;
-
-    try {
-      const raw = fs.readFileSync(env.ML_MODEL_COMPARISON_PATH, "utf-8");
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed?.feature_importances)) {
-        cachedDriverImportances = parsed.feature_importances as {
-          feature: string;
-          importance: number;
-        }[];
-        return cachedDriverImportances;
-      }
-    } catch {
-      // Fall through to the checked-in snapshot if the file is unavailable.
-    }
-
-    cachedDriverImportances = FEATURE_IMPORTANCE;
-    return cachedDriverImportances;
-  }
-
-  // ── Loss-stage breakdown (pipeline-scoped) ──
-  // For lost leads, the stage immediately before the terminal LOST entry is
-  // the stage where the deal actually fell apart. We read stageHistory, take
-  // the second-to-last entry, and group by that stage name.
-  async getLossStageBreakdown(workspaceId: string, pipelineId?: string) {
-    const rows = await Lead.aggregate([
-      {
-        $match: {
-          ...this.baseScope(workspaceId, pipelineId),
-          status: LeadStatus.LOST,
-          // Need at least two history entries to have a "stage before LOST".
-          "stageHistory.1": { $exists: true },
-        },
-      },
-      {
-        $addFields: {
-          prevStage: {
-            $arrayElemAt: ["$stageHistory", -2],
-          },
-        },
-      },
-      {
-        $group: {
-          _id: "$prevStage.stageName",
-          count: { $sum: 1 },
-          value: { $sum: "$value" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          stageName: { $ifNull: ["$_id", "Unknown stage"] },
-          count: 1,
-          value: 1,
-        },
-      },
-      { $sort: { value: -1 } },
-    ]);
-
-    const total = rows.reduce(
-      (acc, r) => ({
-        count: acc.count + r.count,
-        value: acc.value + r.value,
-      }),
-      { count: 0, value: 0 },
-    );
-
-    return { stages: rows, count: total.count, value: total.value };
+  // ── Part 5 (STUB — not built yet): stage-loss aggregation ──
+  // Intended to answer "at which stage are we losing leads, and why?" by
+  // aggregating lost leads grouped by the stage they were in when lost,
+  // broken down by lostReasonTag. This will read from Lead.stageHistory /
+  // Lead.lostReasonTag once the reporting requirements are finalized.
+  //
+  // TODO(part-5): implement the aggregation pipeline. Left intentionally
+  // unimplemented per the current scope.
+  async getStageLossBreakdown(
+    _workspaceId: string,
+    _options?: { pipelineId?: string },
+  ): Promise<never> {
+    throw new Error("getStageLossBreakdown is not implemented yet (Part 5 stub).");
   }
 }
 
