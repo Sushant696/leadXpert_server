@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { Lead, LeadDocument, ILead } from "../models/lead.model";
+import { LeadStatus } from "../types/shared.types";
 
 interface ILeadRepository {
   createLead(leadData: Partial<ILead>): Promise<LeadDocument>;
@@ -18,7 +19,8 @@ interface ILeadRepository {
   moveLeadToStage(
     leadId: string,
     stageId: string,
-    stageName: string
+    stageName: string,
+    updates?: Partial<ILead>,
   ): Promise<LeadDocument | null>;
   assignLeadToUser(
     leadId: string,
@@ -33,6 +35,7 @@ interface ILeadRepository {
     lostReason?: string,
   ): Promise<LeadDocument | null>;
   deleteLead(leadId: string): Promise<void>;
+  incrementActivityCount(leadId: string): Promise<void>;
 }
 
 class LeadRepository implements ILeadRepository {
@@ -41,16 +44,20 @@ class LeadRepository implements ILeadRepository {
   }
 
   async getLeadById(leadId: string): Promise<LeadDocument | null> {
-    return await Lead.findById(leadId).populate(
-      "contactId",
-      "name email phone",
-    );
+    return await Lead.findById(leadId)
+      .populate("contactId", "name email phone")
+      .populate("stageId", "name order")
+      .populate("assignedTo", "name email");
   }
 
   async getLeadsByworkspaceId(
     workspaceId: string,
   ): Promise<LeadDocument[]> {
     return await Lead.find({ workspaceId })
+      .populate("contactId", "name email phone")
+      .populate("stageId", "name order")
+      .populate("assignedTo", "name email")
+      .sort({ createdAt: -1 });
   }
 
   async getLeadsByPipelineId(
@@ -90,7 +97,8 @@ class LeadRepository implements ILeadRepository {
   async moveLeadToStage(
     leadId: string,
     stageId: string,
-    stageName: string
+    stageName: string,
+    updates?: Partial<ILead>,
   ): Promise<LeadDocument | null> {
     const lead = await Lead.findById(leadId);
     if (!lead) return null;
@@ -109,6 +117,13 @@ class LeadRepository implements ILeadRepository {
 
     lead.stageId = new Types.ObjectId(stageId);
     lead.stageEnteredAt = now;
+
+    // Apply any status/conversion/lost-reason field changes decided by the
+    // service's stage-type branching, then persist in a single save() so the
+    // scoring post-save hook runs exactly once.
+    if (updates) {
+      lead.set(updates);
+    }
 
     return await lead.save();
   }
@@ -146,7 +161,7 @@ class LeadRepository implements ILeadRepository {
     return await Lead.findByIdAndUpdate(
       leadId,
       {
-        status: "lost",
+        status: LeadStatus.LOST,
         lostReason,
       },
       { new: true },
@@ -155,6 +170,10 @@ class LeadRepository implements ILeadRepository {
 
   async deleteLead(leadId: string): Promise<void> {
     await Lead.findByIdAndDelete(leadId);
+  }
+
+  async incrementActivityCount(leadId: string): Promise<void> {
+    await Lead.findByIdAndUpdate(leadId, { $inc: { activityCount: 1 } });
   }
 }
 
