@@ -188,6 +188,51 @@ async function callScoreEndpoint(features: ScoreFeatureVector): Promise<ScoreRes
 }
 
 // ══════════════════════════════════════════════
+// DEBOUNCED TRIGGER (dedup)
+// ══════════════════════════════════════════════
+
+// A single user action (stage move, lead update, lead create, adding a
+// note/task) usually performs MORE THAN ONE write to the Lead within the same
+// request — e.g. moveLeadToStage() does a save() AND then logActivity() bumps
+// activityCount via a separate findByIdAndUpdate(). Each write independently
+// fires a Mongoose scoring hook, so the lead was being scored twice within
+// milliseconds. Because the two calls re-read the document at slightly
+// different instants they could compute different feature snapshots, and
+// whichever write landed last silently won — making the stored mlScore a race.
+//
+// scheduleScoreLead() collapses every trigger for a given lead id inside a
+// short window into ONE scoring run. The run re-fetches the lead at execution
+// time, so the single score reflects the FINAL settled state (deterministic),
+// and exactly one scoreHistory entry is appended per real action.
+const SCORE_DEBOUNCE_MS = 250;
+const pendingScoreTimers = new Map<string, NodeJS.Timeout>();
+
+export function scheduleScoreLead(leadId: Types.ObjectId | string): void {
+  const key = String(leadId);
+
+  // Any earlier trigger for this lead still waiting? Drop it — the newest
+  // trigger will read a state that already includes the earlier write.
+  const existing = pendingScoreTimers.get(key);
+  if (existing) clearTimeout(existing);
+
+  const timer = setTimeout(() => {
+    pendingScoreTimers.delete(key);
+    // Re-fetch fresh so the score reflects every write in the burst, not the
+    // stale snapshot captured by whichever hook fired first.
+    Lead.findById(key)
+      .then((fresh) => (fresh ? scoreLead(fresh as LeadDocument) : null))
+      .catch((err) =>
+        console.error(`[ScoringService] scheduled score failed for ${key}:`, err)
+      );
+  }, SCORE_DEBOUNCE_MS);
+
+  // Don't let a pending rescore keep the process alive on shutdown.
+  if (typeof timer.unref === "function") timer.unref();
+
+  pendingScoreTimers.set(key, timer);
+}
+
+// ══════════════════════════════════════════════
 // PUBLIC API
 // ══════════════════════════════════════════════
 
@@ -199,7 +244,9 @@ async function callScoreEndpoint(features: ScoreFeatureVector): Promise<ScoreRes
  * @returns     ScoreResult | null (null on failure — non-fatal)
  */
 export async function scoreLead(lead: LeadDocument): Promise<ScoreResult | null> {
-  // Skip scoring for resolved leads (won/lost/archived — already closed out)
+  // Freeze rule: never rescore a resolved lead (won/lost/archived/converted).
+  // This guard runs BEFORE any scoring work — no ML call, no history push, no
+  // field update — so a WON/LOST lead's score is left frozen at its last value.
   if (
     lead.isConverted ||
     lead.status === "WON" ||
@@ -212,15 +259,31 @@ export async function scoreLead(lead: LeadDocument): Promise<ScoreResult | null>
   try {
     const features = await extractFeatures(lead);
     const result   = await callScoreEndpoint(features);
+    const scoredAt = new Date(result.scoredAt);
 
-    // Write back to MongoDB — use updateOne to avoid re-triggering hooks
+    // Write back to MongoDB — use updateOne to avoid re-triggering hooks.
+    // Two writes in one op:
+    //   1. $push a new entry onto scoreHistory (append-only trend record)
+    //   2. $set the flat mlScore/mlPriority/lastScoredAt/scoreFeatures fields to
+    //      the newest values, so existing indexed sort/filter queries keep
+    //      working on plain values (they never read the array).
+    // TODO: consider capping history length or archiving old entries if this
+    // grows large at scale.
     await Lead.updateOne(
       { _id: lead._id },
       {
+        $push: {
+          scoreHistory: {
+            score:    result.mlScore,
+            priority: result.mlPriority,
+            scoredAt,
+            features,
+          },
+        },
         $set: {
           mlScore:       result.mlScore,
           mlPriority:    result.mlPriority,
-          lastScoredAt:  new Date(result.scoredAt),
+          lastScoredAt:  scoredAt,
           scoreFeatures: features,
         },
       }
@@ -274,6 +337,12 @@ export async function batchScoreLeads(
     })
   );
 
+  // Keep each lead's feature vector reachable by id so the history entry we push
+  // below carries the same features scoreLead() stores on the single-lead path.
+  const featuresByLeadId = new Map(
+    featureVectors.map(({ leadId, ...features }) => [leadId, features])
+  );
+
   // Call batch endpoint
   const { data } = await axios.post(
     `${ML_SERVICE_URL}/score/batch`,
@@ -281,21 +350,37 @@ export async function batchScoreLeads(
     { timeout: 30_000 }
   );
 
-  // Write results back
+  // Write results back. Same shape as the single-lead path: $push the new entry
+  // onto scoreHistory and $set the flat "current value" fields to match.
+  // TODO: consider capping history length or archiving old entries if this
+  // grows large at scale.
   const bulkOps = data.results
     .filter((r: any) => !r.error)
-    .map((r: ScoreResult & { leadId: string }) => ({
-      updateOne: {
-        filter: { _id: new Types.ObjectId(r.leadId) },
-        update: {
-          $set: {
-            mlScore:      r.mlScore,
-            mlPriority:   r.mlPriority,
-            lastScoredAt: new Date(r.scoredAt),
+    .map((r: ScoreResult & { leadId: string }) => {
+      const scoredAt = new Date(r.scoredAt);
+      const features = featuresByLeadId.get(r.leadId) ?? null;
+      return {
+        updateOne: {
+          filter: { _id: new Types.ObjectId(r.leadId) },
+          update: {
+            $push: {
+              scoreHistory: {
+                score:    r.mlScore,
+                priority: r.mlPriority,
+                scoredAt,
+                features,
+              },
+            },
+            $set: {
+              mlScore:       r.mlScore,
+              mlPriority:    r.mlPriority,
+              lastScoredAt:  scoredAt,
+              scoreFeatures: features,
+            },
           },
         },
-      },
-    }));
+      };
+    });
 
   if (bulkOps.length > 0) {
     await Lead.bulkWrite(bulkOps);

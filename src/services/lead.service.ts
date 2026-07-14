@@ -230,6 +230,25 @@ class LeadService {
     return this.ensureLeadInPipeline(leadId, pipelineId);
   }
 
+  // Workspace-scoped single-lead fetch for the lead detail page, which only
+  // knows the workspace + lead id (no pipeline id in its route). Verifies the
+  // lead belongs to the caller's workspace rather than to a specific pipeline.
+  async getLeadByIdForWorkspace(workspaceId: string, leadId: string) {
+    const lead = await leadRepository.getLeadById(leadId);
+    if (!lead) {
+      throw new ApiError(StatusCodes.NOT_FOUND, errorMessages.LEAD.NOT_FOUND);
+    }
+
+    if (lead.workspaceId.toString() !== workspaceId) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        errorMessages.AUTHORIZATION.INSUFFICIENT_PERMISSION,
+      );
+    }
+
+    return lead;
+  }
+
   async updateLead(
     pipelineId: string,
     leadId: string,

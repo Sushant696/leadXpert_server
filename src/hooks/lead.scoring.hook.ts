@@ -10,8 +10,15 @@
  * BEFORE the model is compiled (see the bottom of lead.model.ts).
  *
  * The hooks are fire-and-forget — they never block the API response, and
- * scoreLead() is imported lazily to avoid a circular dependency with
+ * scheduleScoreLead() is imported lazily to avoid a circular dependency with
  * lead.model.ts (scoring.service imports the Lead model).
+ *
+ * Both hooks funnel through scheduleScoreLead(), which DEBOUNCES per lead id:
+ * a single user action often triggers several writes to the same lead (e.g. a
+ * stage move saves the lead AND separately bumps activityCount for the activity
+ * log), which would otherwise each fire a scoring run and race each other. The
+ * debounce collapses the burst into exactly one scoring call over the final
+ * settled state — one action, one score, one scoreHistory entry.
  */
 
 import type { Schema } from "mongoose";
@@ -39,8 +46,10 @@ export function registerLeadScoringHook(schema: Schema): void {
   // ── Post-save: fires after create OR save
   schema.post("save", function (doc) {
     // Fire-and-forget — don't await so the API response isn't blocked.
+    // scheduleScoreLead debounces per lead id, so multiple writes from one
+    // action collapse into a single scoring run over the final state.
     import("../services/scoring.service")
-      .then(({ scoreLead }) => scoreLead(doc as never))
+      .then(({ scheduleScoreLead }) => scheduleScoreLead(String(doc._id)))
       .catch((err) => console.error("[LeadScoringHook] post-save error:", err));
   });
 
@@ -56,17 +65,10 @@ export function registerLeadScoringHook(schema: Schema): void {
 
     if (!changedFields.some((f) => SCORING_TRIGGER_FIELDS.has(f))) return;
 
-    // Re-fetch the full document via the query's own model (avoids importing
-    // the Lead model here and the circular dependency that would create).
-    const model = this.model;
-    model
-      .findById(doc._id)
-      .then((fresh) => {
-        if (!fresh) return;
-        return import("../services/scoring.service").then(({ scoreLead }) =>
-          scoreLead(fresh as never)
-        );
-      })
+    // Just schedule by id — the debounced runner re-fetches the fresh document
+    // itself, so we neither score a stale snapshot nor need the Lead model here.
+    import("../services/scoring.service")
+      .then(({ scheduleScoreLead }) => scheduleScoreLead(String(doc._id)))
       .catch((err) =>
         console.error("[LeadScoringHook] findOneAndUpdate error:", err)
       );

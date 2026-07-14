@@ -15,6 +15,20 @@ const SSE_MAX_CONNECTION_MS = 10 * 60 * 1000; // self-close well under the 15m a
 
 const leadService = new LeadService();
 
+// Shape a single lead for the detail response: scoreHistory is returned as a
+// lightweight { score, scoredAt } series for the trend chart — priority/features
+// are omitted to keep the response small (the full entries stay in the DB).
+function toLeadDetailResponse(lead: import("../models/lead.model").LeadDocument) {
+  const leadObject = lead.toObject();
+  leadObject.scoreHistory = (leadObject.scoreHistory ?? []).map(
+    (entry: { score: number; scoredAt: Date }) => ({
+      score: entry.score,
+      scoredAt: entry.scoredAt,
+    }),
+  );
+  return leadObject;
+}
+
 class LeadController {
   createLead = asyncHandler(async (req: Request, res: Response) => {
     const parsedData = CreateLeadDto.safeParse(req.body);
@@ -84,7 +98,22 @@ class LeadController {
 
     return res.json(
       new ApiResponse(StatusCodes.OK, responseMessages.LEAD.RETRIEVED, {
-        lead,
+        lead: toLeadDetailResponse(lead),
+      }),
+    );
+  });
+
+  // Workspace-scoped single-lead fetch for the lead detail page (route carries
+  // only workspaceId + leadId, no pipeline id).
+  getLeadDetail = asyncHandler(async (req: Request, res: Response) => {
+    const workspaceId = req.params.workspaceId;
+    const leadId = req.params.leadId;
+
+    const lead = await leadService.getLeadByIdForWorkspace(workspaceId, leadId);
+
+    return res.json(
+      new ApiResponse(StatusCodes.OK, responseMessages.LEAD.RETRIEVED, {
+        lead: toLeadDetailResponse(lead),
       }),
     );
   });
