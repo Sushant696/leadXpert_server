@@ -4,6 +4,8 @@ import {
   Pipeline,
   PipelineDocument,
 } from "../models/pipeline.model";
+import { Lead } from "../models/lead.model";
+import { LeadStatus } from "../types/shared.types";
 
 interface PipelineRepositoryInterface {
   getPipelineById(id: string): Promise<PipelineDocument | null>;
@@ -27,6 +29,7 @@ interface PipelineRepositoryInterface {
     pipelineId: Types.ObjectId,
     data: string[],
   ): Promise<PipelineDocument | null>;
+  syncPipelineStats(pipelineId: string): Promise<PipelineDocument | null>;
 }
 
 class PipelineRepository implements PipelineRepositoryInterface {
@@ -95,6 +98,70 @@ class PipelineRepository implements PipelineRepositoryInterface {
 
   async deletePipeline(id: string): Promise<void> {
     await Pipeline.findByIdAndDelete(id);
+  }
+
+  /**
+   * Recomputes the denormalized `stats` block for a pipeline from its leads
+   * and persists it. Called after any change that can affect lead counts or
+   * value (create / move / status change / delete). Archived leads are
+   * excluded from the totals.
+   */
+  async syncPipelineStats(
+    pipelineId: string,
+  ): Promise<PipelineDocument | null> {
+    const pipelineObjectId = new Types.ObjectId(pipelineId);
+
+    const [grouped] = await Lead.aggregate<{
+      totalLeads: number;
+      openLeads: number;
+      wonLeads: number;
+      lostLeads: number;
+      totalValue: number;
+      wonValue: number;
+    }>([
+      {
+        $match: {
+          pipelineId: pipelineObjectId,
+          status: { $ne: LeadStatus.ARCHIVED },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalLeads: { $sum: 1 },
+          openLeads: {
+            $sum: { $cond: [{ $eq: ["$status", LeadStatus.OPEN] }, 1, 0] },
+          },
+          wonLeads: {
+            $sum: { $cond: [{ $eq: ["$status", LeadStatus.WON] }, 1, 0] },
+          },
+          lostLeads: {
+            $sum: { $cond: [{ $eq: ["$status", LeadStatus.LOST] }, 1, 0] },
+          },
+          totalValue: { $sum: "$value" },
+          wonValue: {
+            $sum: {
+              $cond: [{ $eq: ["$status", LeadStatus.WON] }, "$value", 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    const stats = {
+      totalLeads: grouped?.totalLeads ?? 0,
+      openLeads: grouped?.openLeads ?? 0,
+      wonLeads: grouped?.wonLeads ?? 0,
+      lostLeads: grouped?.lostLeads ?? 0,
+      totalValue: grouped?.totalValue ?? 0,
+      wonValue: grouped?.wonValue ?? 0,
+    };
+
+    return Pipeline.findByIdAndUpdate(
+      pipelineObjectId,
+      { $set: { stats } },
+      { new: true },
+    );
   }
 }
 
