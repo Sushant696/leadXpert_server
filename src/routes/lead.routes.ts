@@ -30,6 +30,16 @@ leadRouter.get(
   leadController.getLeadsByWorkspace,
 );
 
+// get single lead by workspace (lead detail page — no pipeline id in its route).
+// Distinct from the pipeline-scoped GET below: this path's second segment is the
+// literal "leads", not "pipelines/:pipelineId", so the two never collide.
+leadRouter.get(
+  "/:workspaceId/leads/:leadId",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  leadController.getLeadDetail,
+);
+
 // get all leads (kanban + list view)
 leadRouter.get(
   "/:workspaceId/pipelines/:pipelineId/leads",
@@ -46,6 +56,15 @@ leadRouter.get(
   checkWorkspaceMembership,
   checkPipelinesAccess,
   leadController.getLeadById,
+);
+
+// live updates for a lead (SSE)
+leadRouter.get(
+  "/:workspaceId/pipelines/:pipelineId/leads/:leadId/events",
+  middlewares.isAuthenticated,
+  checkWorkspaceMembership,
+  checkPipelinesAccess,
+  leadController.streamLeadEvents,
 );
 
 // update lead
