@@ -188,6 +188,51 @@ async function callScoreEndpoint(features: ScoreFeatureVector): Promise<ScoreRes
 }
 
 // ══════════════════════════════════════════════
+// DEBOUNCED TRIGGER (dedup)
+// ══════════════════════════════════════════════
+
+// A single user action (stage move, lead update, lead create, adding a
+// note/task) usually performs MORE THAN ONE write to the Lead within the same
+// request — e.g. moveLeadToStage() does a save() AND then logActivity() bumps
+// activityCount via a separate findByIdAndUpdate(). Each write independently
+// fires a Mongoose scoring hook, so the lead was being scored twice within
+// milliseconds. Because the two calls re-read the document at slightly
+// different instants they could compute different feature snapshots, and
+// whichever write landed last silently won — making the stored mlScore a race.
+//
+// scheduleScoreLead() collapses every trigger for a given lead id inside a
+// short window into ONE scoring run. The run re-fetches the lead at execution
+// time, so the single score reflects the FINAL settled state (deterministic),
+// and exactly one scoreHistory entry is appended per real action.
+const SCORE_DEBOUNCE_MS = 250;
+const pendingScoreTimers = new Map<string, NodeJS.Timeout>();
+
+export function scheduleScoreLead(leadId: Types.ObjectId | string): void {
+  const key = String(leadId);
+
+  // Any earlier trigger for this lead still waiting? Drop it — the newest
+  // trigger will read a state that already includes the earlier write.
+  const existing = pendingScoreTimers.get(key);
+  if (existing) clearTimeout(existing);
+
+  const timer = setTimeout(() => {
+    pendingScoreTimers.delete(key);
+    // Re-fetch fresh so the score reflects every write in the burst, not the
+    // stale snapshot captured by whichever hook fired first.
+    Lead.findById(key)
+      .then((fresh) => (fresh ? scoreLead(fresh as LeadDocument) : null))
+      .catch((err) =>
+        console.error(`[ScoringService] scheduled score failed for ${key}:`, err)
+      );
+  }, SCORE_DEBOUNCE_MS);
+
+  // Don't let a pending rescore keep the process alive on shutdown.
+  if (typeof timer.unref === "function") timer.unref();
+
+  pendingScoreTimers.set(key, timer);
+}
+
+// ══════════════════════════════════════════════
 // PUBLIC API
 // ══════════════════════════════════════════════
 
