@@ -31,6 +31,16 @@ interface ScoreFeatures {
   [key: string]: unknown
 }
 
+// Append-only record of every score this lead has received. The newest entry
+// is mirrored into the flat mlScore/mlPriority/lastScoredAt/scoreFeatures fields
+// below (which keep the existing sort/filter indexes working on plain values).
+interface ScoreHistoryEntry {
+  score: number
+  priority?: LeadPriority | null
+  scoredAt: Date
+  features?: ScoreFeatures | null
+}
+
 export interface ILead extends Omit<
   LeadType,
   | "contactId"
@@ -89,10 +99,16 @@ export interface ILead extends Omit<
   activityCount: number;
 
   // ─── ML Fields
+  // mlScore/mlPriority/lastScoredAt/scoreFeatures are the denormalized "current
+  // value" fields — always the newest score, kept flat so indexed sort/filter
+  // queries (e.g. { workspaceId: 1, mlScore: -1 }) run on a plain number.
   mlScore: number;
   mlPriority?: LeadPriority | null;
   lastScoredAt?: Date | null;
   scoreFeatures?: ScoreFeatures | null;
+
+  // Full history of every score, appended on each rescore (see scoring.service).
+  scoreHistory: ScoreHistoryEntry[];
 }
 
 const StageHistoryEntrySchema = new Schema(
@@ -107,6 +123,20 @@ const StageHistoryEntrySchema = new Schema(
     exitedAt: { type: Date, default: null },
     timeSpentMs: { type: Number, default: 0 },
     movedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+  },
+  { _id: false },
+);
+
+const ScoreHistoryEntrySchema = new Schema(
+  {
+    score: { type: Number, required: true, min: 0, max: 100 },
+    priority: {
+      type: String,
+      enum: Object.values(LeadPriority),
+      default: null,
+    },
+    scoredAt: { type: Date, required: true },
+    features: { type: Schema.Types.Mixed, default: null },
   },
   { _id: false },
 );
@@ -229,6 +259,10 @@ const LeadSchema = new Schema<ILead>(
     scoreFeatures: {
       type: Schema.Types.Mixed,
       default: null,
+    },
+    scoreHistory: {
+      type: [ScoreHistoryEntrySchema],
+      default: [],
     },
   },
   { timestamps: true, versionKey: false },
