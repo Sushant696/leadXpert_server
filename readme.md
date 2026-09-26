@@ -7,11 +7,15 @@ This repository contains the **backend only**.
 
 LeadXpert was originally developed inside a monorepo and later split for better maintainability.
 
-Client application using this API:
+Client application:
 
 - **Web App (Next.js)**
-  https://github.com/Sushant696/leadxpert_web
+  https://github.com/Sushant696/leadxpert_client
+  
+Machine learning module:
 
+- **ML/Service**
+  https://github.com/Sushant696/leadXpert_ml_service
 ---
 
 ## Tech Stack
